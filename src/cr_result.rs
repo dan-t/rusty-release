@@ -12,10 +12,18 @@ pub enum CrErr {
     Message(String)
 }
 
+pub fn err_message<M: Into<String>, T>(msg: M) -> CrResult<T> {
+    Err(cr_err_message(msg))
+}
+
+pub fn cr_err_message<M: Into<String>>(msg: M) -> CrErr {
+    CrErr::Message(msg.into())
+}
+
 impl Display for CrErr {
     fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
-        match self {
-            &CrErr::Message(ref msg) => writeln!(f, "{}", msg),
+        match *self {
+            CrErr::Message(ref msg) => writeln!(f, "{}", msg),
         }
     }
 }
