@@ -6,7 +6,7 @@ use std::fmt::{self, Display, Formatter};
 pub type CrResult<T> = Result<T, CrErr>;
 
 /// The error type used in `cargo-release`.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CrErr {
     /// generic error message
     Message(String)

@@ -21,10 +21,25 @@ impl CargoToml {
         Ok(try!(CargoToml::new(path)))
     }
 
+    /// Creates a `CargoToml` from the `Cargo.toml` located at `cargo_toml`.
     pub fn new<P: Into<PathBuf>>(cargo_toml: P) -> CrResult<CargoToml> {
         let path = cargo_toml.into();
         let table = try!(parse_toml(&path));
         Ok(CargoToml { path: path, table: table })
+    }
+
+    /// Returns the name of the cargo project.
+    pub fn project_name(&self) -> CrResult<&str> {
+        let package = try!(self.package_table());
+        package.get("name")
+            .and_then(toml::Value::as_str)
+            .ok_or_else(|| cr_err_message(format!("Couldn't get 'name' string from: {:?}", package)))
+    }
+
+    fn package_table(&self) -> CrResult<&toml::Table> {
+        self.table.get("package")
+            .and_then(toml::Value::as_table)
+            .ok_or_else(|| cr_err_message(format!("Couldn't get 'package' table from: {:?}", self.table)))
     }
 }
 

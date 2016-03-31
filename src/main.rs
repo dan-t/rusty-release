@@ -25,6 +25,7 @@ fn execute() -> CrResult<()> {
     println!("{:?}", config);
     let cargo_toml = try!(CargoToml::find(&config.start_dir));
     println!("{:?}", cargo_toml);
+    println!("{:?}", cargo_toml.project_name());
     let _ = try!(git::check_clear_state());
     Ok(())
 }
