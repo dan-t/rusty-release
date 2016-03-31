@@ -1,0 +1,6 @@
+[package]
+name = "cargo-release"
+version = "0.1.0"
+authors = ["Daniel Trstenjak <daniel.trstenjak@gmail.com>"]
+
+[dependencies]
