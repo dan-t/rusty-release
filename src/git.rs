@@ -2,8 +2,8 @@ use std::process::Command;
 use cr_result::{CrResult, err_message};
 use utils::check_output;
 
-/// Checks if git has a clean state, a non dirty working directory
-/// and an empty stage area.
+/// Checks if git has a clean state, a non dirty working directory,
+/// an empty stage area and a non diverging local and remote git repository.
 pub fn check_clean_state() -> CrResult<()> {
     if try!(has_dirty_working_dir()) {
         return err_message("Can't operate with dirty git working directory! Clear or commit changes!");
@@ -17,7 +17,7 @@ pub fn check_clean_state() -> CrResult<()> {
     try!(remote_update());
     let remote_head = try!(remote_head());
     if local_head != remote_head {
-        return err_message("Can't operate with diverging local and remote git repository! Syncronize them!")
+        return err_message("Can't operate with diverging local and remote git repository! Synchronize them!")
     }
 
     Ok(())

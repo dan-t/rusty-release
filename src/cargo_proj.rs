@@ -85,6 +85,10 @@ impl CargoProj {
 }
 
 /// Convenience macro to read all files from a directory.
+///
+/// Should be possible to be written as a function, but for
+/// now I didn't want to wrangle with rustc to find the
+/// correct return type for ther FilterMap iterator adpater.
 macro_rules! read_files {
     ($dir:expr) => (
         {
