@@ -1,4 +1,6 @@
+use std::io::Write;
 use std::process::Command;
+use tempfile::{NamedTempFile, NamedTempFileOptions};
 use cr_result::{CrResult, err_message};
 use utils::check_output;
 
@@ -67,6 +69,30 @@ pub fn push() -> CrResult<()> {
 
     try!(check_output(&output));
     Ok(())
+}
+
+pub fn log_file(from: &str, to: &str) -> CrResult<NamedTempFile> {
+    let output = try!(log(from, to));
+    let mut log_file = try!(NamedTempFileOptions::new()
+        .prefix(&format!("{}...{}___", from, to))
+        .create());
+
+    try!(log_file.write_all(output.as_bytes()));
+    Ok(log_file)
+}
+
+pub fn log(from: &str, to: &str) -> CrResult<String> {
+    let output = try!(Command::new("git")
+        .arg("--no-pager")
+        .arg("log")
+        .arg("--decorate=short")
+        .arg("--pretty=oneline")
+        .arg("--abbrev-commit")
+        .arg(format!("{}...{}", from, to))
+        .output());
+
+    try!(check_output(&output));
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
 /// If the working directory has uncommited changes.

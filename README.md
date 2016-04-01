@@ -42,10 +42,11 @@ inside of the cargo project should start the release process:
 
 * Builds a release.
 
-* The changelog (if available) is opened with the new version added at the top of it.
+* The changelog (if available) is opened with the new version added at the top of it and
+  a temporary file containing all commits from HEAD to the previous release.
   Every file which lower case base name is equal to `changelog` is considered as a changelog
-  file. The default editor for opening the changelog file is `gvim` and can be configured with
-  the environment variable `CARGO_RELEASE_EDITOR`.
+  file. The default editor for opening the changelog file and the temporary file with the
+  commits is `gvim -o` and can be configured with the environment variable `CARGO_RELEASE_EDITOR`.
 
 * A git commit is created containing the changed and not ignored files with the message
   `<PROJ_NAME> <NEW_VERSION>`, where `<PROJ_NAME>` is the cargo project name and `<NEW_VERSION>`

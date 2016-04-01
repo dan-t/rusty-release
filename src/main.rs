@@ -3,13 +3,14 @@ extern crate clap;
 extern crate toml;
 extern crate semver;
 extern crate term;
+extern crate tempfile;
 
 use std::io::{Read, Write};
 use std::fs::{File, OpenOptions};
 use std::path::Path;
 use std::process::Command;
 use semver::Version;
-use cr_result::CrResult;
+use cr_result::{CrResult, err_message};
 use config::Config;
 use cargo_proj::CargoProj;
 use utils::check_output;
@@ -59,13 +60,13 @@ fn execute() -> CrResult<()> {
 
     if let Some(changelog) = cargo_proj.changelog() {
         try!(writeln!(stdout, "Updating changelog ..."));
-        try!(update_changelog(changelog, &new_version));
+        try!(update_changelog(changelog, cargo_proj.name(), &curr_version, &new_version));
     }
 
     try!(writeln!(stdout, "Creating git commit ..."));
     try!(git::add_update());
-    try!(git::commit(&commit_message(&cargo_proj)));
-    try!(git::tag(&tag_name(&cargo_proj)));
+    try!(git::commit(&commit_message(cargo_proj.name(), cargo_proj.version())));
+    try!(git::tag(&tag_name(cargo_proj.name(), cargo_proj.version())));
 
     try!(writeln!(stdout, "Pushing git changes ..."));
     try!(git::push());
@@ -77,8 +78,14 @@ fn execute() -> CrResult<()> {
 }
 
 /// Adds `new_version` at the top of the `changelog` and opens
-/// `changelog` in the editor specified by `CARGO_RELEASE_EDITOR` (default: gvim).
-fn update_changelog(changelog: &Path, new_version: &Version) -> CrResult<()> {
+/// `changelog` and a temporary file containing the commits from
+/// HEAD till the last release in the editor specified by
+/// `CARGO_RELEASE_EDITOR` (default: gvim -o).
+fn update_changelog(changelog: &Path,
+                    proj_name: &str,
+                    curr_version: &Version,
+                    new_version: &Version)
+                    -> CrResult<()> {
     let contents = {
         let mut file = try!(File::open(changelog));
         let mut contents = String::new();
@@ -97,21 +104,34 @@ fn update_changelog(changelog: &Path, new_version: &Version) -> CrResult<()> {
         try!(file.write_all(contents.as_bytes()));
     }
 
-    let editor = std::env::var("CARGO_RELEASE_EDITOR").unwrap_or("gvim".to_string());
-    let output = try!(Command::new(editor)
-        .arg(changelog)
+    let log_file = try!(git::log_file("HEAD", &tag_name(proj_name, curr_version)));
+
+    let editor_cmd = std::env::var("CARGO_RELEASE_EDITOR").unwrap_or("gvim -o".to_string());
+    if editor_cmd.len() == 0 {
+        return err_message("Invalid command defined for CARGO_RELEASE_EDITOR!");
+    }
+
+    let editor_and_args = editor_cmd.split(' ').collect::<Vec<&str>>();
+    let mut cmd = Command::new(editor_and_args[0]);
+    let args = editor_and_args.iter().skip(1);
+    for arg in args {
+        cmd.arg(arg);
+    }
+
+    let output = try!(cmd.arg(changelog)
+        .arg(log_file.path())
         .output());
 
     try!(check_output(&output));
     Ok(())
 }
 
-fn commit_message(proj: &CargoProj) -> String {
-    format!("{} {}", proj.name(), proj.version())
+fn commit_message(proj_name: &str, version: &Version) -> String {
+    format!("{} {}", proj_name, version)
 }
 
-fn tag_name(proj: &CargoProj) -> String {
-    format!("{}-{}", proj.name(), proj.version())
+fn tag_name(proj_name: &str, version: &Version) -> String {
+    format!("{}-{}", proj_name, version)
 }
 
 fn set_stdout_stderr_colors() {
