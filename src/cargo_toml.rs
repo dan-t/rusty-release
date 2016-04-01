@@ -2,6 +2,7 @@ use std::io::Read;
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use toml;
+use semver::Version;
 use cr_result::{CrResult, err_message, cr_err_message};
 
 #[derive(Debug)]
@@ -9,8 +10,8 @@ pub struct CargoToml {
     /// the path to the `Cargo.toml`
     path: PathBuf,
 
-    /// the parsed toml table from `path`
-    table: toml::Table
+    /// the parsed toml value from `path`
+    pub value: toml::Value
 }
 
 impl CargoToml {
@@ -25,21 +26,33 @@ impl CargoToml {
     pub fn new<P: Into<PathBuf>>(cargo_toml: P) -> CrResult<CargoToml> {
         let path = cargo_toml.into();
         let table = try!(parse_toml(&path));
-        Ok(CargoToml { path: path, table: table })
+        Ok(CargoToml { path: path, value: toml::Value::Table(table) })
     }
 
     /// Returns the name of the cargo project.
     pub fn project_name(&self) -> CrResult<&str> {
-        let package = try!(self.package_table());
-        package.get("name")
+        self.value.lookup("package.name")
             .and_then(toml::Value::as_str)
-            .ok_or_else(|| cr_err_message(format!("Couldn't get 'name' string from: {:?}", package)))
+            .ok_or_else(|| cr_err_message(format!("Couldn't get 'package.name' string from: {:?}", self.value)))
     }
 
-    fn package_table(&self) -> CrResult<&toml::Table> {
-        self.table.get("package")
-            .and_then(toml::Value::as_table)
-            .ok_or_else(|| cr_err_message(format!("Couldn't get 'package' table from: {:?}", self.table)))
+    /// Returns the version of the cargo project.
+    pub fn project_version(&self) -> CrResult<Version> {
+        let vers_str = try!(self.value.lookup("package.version")
+            .and_then(toml::Value::as_str)
+            .ok_or_else(|| cr_err_message(format!("Couldn't get 'package.version' string from: {:?}", self.value))));
+
+        let vers = try!(Version::parse(vers_str));
+        Ok(vers)
+    }
+
+    /// Sets the version of the cargo version. This only changes
+    /// the version in the internal representation of `CargoToml`,
+    /// the `Cargo.toml` isn't modified until `write` is called.
+    pub fn set_project_version(&mut self, version: &Version) {
+        set_value_at_path(&mut self.value,
+                          &toml::Value::String(format!("{}", version)),
+                          &["package", "version"]);
     }
 }
 
@@ -72,4 +85,48 @@ fn parse_toml(path: &Path) -> CrResult<toml::Table> {
     try!(file.read_to_string(&mut string));
     let mut parser = toml::Parser::new(&string);
     parser.parse().ok_or_else(|| cr_err_message(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors)))
+}
+
+fn set_value_at_path(toml: &mut toml::Value, value: &toml::Value, path: &[&str]) {
+    if path.len() == 0 {
+        return
+    }
+
+    match *toml {
+        toml::Value::Table(ref mut t) => {
+            match t.get_mut(path[0]) {
+                Some(v) => {
+                    if path.len() == 1 {
+                        *v = value.clone();
+                    } else {
+                        set_value_at_path(v, value, path.split_at(1).1);
+                    }
+                },
+
+                _ => return
+            }
+        },
+
+        toml::Value::Array(ref mut a) => {
+            match path[0].parse::<usize>().ok() {
+                Some(idx) if idx < a.len() => {
+                    match a.get_mut(idx) {
+                        Some(v) => {
+                            if path.len() == 1 {
+                                *v = value.clone();
+                            } else {
+                                set_value_at_path(v, value, path.split_at(1).1);
+                            }
+                        },
+
+                        _ => return
+                    }
+                },
+
+                _ => return
+            }
+        },
+
+        _ => return
+    }
 }

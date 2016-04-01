@@ -7,7 +7,7 @@ use version_kind::VersionKind;
 /// The configuration used to run `cargo-release`.
 #[derive(Debug)]
 pub struct Config {
-    /// which part of the project version should be increased
+    /// which part of the project version should be incremented
     pub version_kind: VersionKind,
 
     /// start directory for the search of the 'Cargo.toml'
