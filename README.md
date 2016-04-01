@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/dan-t/cargo-release.svg?branch=master)](https://travis-ci.org/dan-t/cargo-release)
+
 cargo-release
 =============
 
