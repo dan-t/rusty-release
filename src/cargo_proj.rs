@@ -59,6 +59,11 @@ impl CargoProj {
     pub fn version(&self) -> &Version {
         &self.version
     }
+
+    pub fn root_dir(&self) -> CrResult<&Path> {
+        self.cargo_toml.parent()
+            .ok_or_else(|| cr_err_message(format!("Couldn't get directory of path: {:?}", self.cargo_toml)))
+    }
 }
 
 /// Convenience macro to read all files from a directory.

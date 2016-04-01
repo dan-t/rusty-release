@@ -26,6 +26,9 @@ fn execute() -> CrResult<()> {
     println!("{:?}", config);
     let cargo_proj = try!(CargoProj::find(&config.start_dir));
     println!("{:?}", cargo_proj);
+    let root_dir = try!(cargo_proj.root_dir());
+    println!("root_dir: {:?}", root_dir);
+    let _ = try!(std::env::set_current_dir(root_dir));
     let _ = try!(git::check_clean_state());
     Ok(())
 }
