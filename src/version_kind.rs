@@ -11,13 +11,14 @@ arg_enum! {
 }
 
 impl VersionKind {
-    pub fn increment(&self, mut version: Version) -> Version {
+    pub fn increment(&self, version: &Version) -> Version {
+        let mut new_vers = version.clone();
         match *self {
-            VersionKind::Major => version.increment_major(),
-            VersionKind::Minor => version.increment_minor(),
-            VersionKind::Patch => version.increment_patch()
+            VersionKind::Major => new_vers.increment_major(),
+            VersionKind::Minor => new_vers.increment_minor(),
+            VersionKind::Patch => new_vers.increment_patch()
         }
 
-        version
+        new_vers
     }
 }
