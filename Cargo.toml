@@ -5,5 +5,6 @@ authors = ["Daniel Trstenjak <daniel.trstenjak@gmail.com>"]
 
 [dependencies]
 clap = "~2.2.4"
+term = "~0.4.4"
 toml = "~0.1.28"
 semver = "~0.2.3"

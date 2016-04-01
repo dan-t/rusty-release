@@ -2,6 +2,7 @@ use std::io;
 use std::convert::From;
 use std::fmt::{self, Display, Formatter};
 use semver::SemVerError;
+use term;
 
 /// The result type used in `cargo-release`.
 pub type CrResult<T> = Result<T, CrErr>;
@@ -40,5 +41,11 @@ impl From<SemVerError> for CrErr {
         match err {
             SemVerError::ParseError(err) => cr_err_message(err)
         }
+    }
+}
+
+impl From<term::Error> for CrErr {
+    fn from(err: term::Error) -> CrErr {
+        cr_err_message(format!("{}", err))
     }
 }
