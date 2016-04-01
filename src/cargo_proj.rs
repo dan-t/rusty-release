@@ -77,9 +77,9 @@ impl CargoProj {
         let contents = contents.replace(&format!("version = \"{}\"", self.version),
                                         &format!("version = \"{}\"", version));
 
-        println!("{}", contents);
+        println!("version = \"{}\"", version);
 //        try!(file.write_all(contents.as_bytes()));
-//        self.version = version.clone();
+        self.version = version.clone();
         Ok(())
     }
 }

@@ -1,5 +1,6 @@
 use std::process::Command;
 use cr_result::{CrResult, err_message};
+use utils::check_output;
 
 pub fn build_release() -> CrResult<()> {
     let output = try!(Command::new("cargo")
@@ -7,12 +8,7 @@ pub fn build_release() -> CrResult<()> {
         .arg("--release")
         .output());
 
-    if ! output.status.success() {
-        return err_message(format!("stdout: {}, stderr: {}\n",
-                                   String::from_utf8_lossy(&output.stdout),
-                                   String::from_utf8_lossy(&output.stderr)));
-    }
-
+    try!(check_output(&output));
     Ok(())
 }
 
@@ -21,11 +17,6 @@ pub fn test() -> CrResult<()> {
         .arg("test")
         .output());
 
-    if ! output.status.success() {
-        return err_message(format!("stdout: {}, stderr: {}\n",
-                                   String::from_utf8_lossy(&output.stdout),
-                                   String::from_utf8_lossy(&output.stderr)));
-    }
-
+    try!(check_output(&output));
     Ok(())
 }

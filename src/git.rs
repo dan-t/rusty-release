@@ -1,15 +1,23 @@
-use cr_result::{CrResult, err_message};
 use std::process::Command;
+use cr_result::{CrResult, err_message};
+use utils::check_output;
 
 /// Checks if git has a clean state, a non dirty working directory
 /// and an empty stage area.
 pub fn check_clean_state() -> CrResult<()> {
     if try!(has_dirty_working_dir()) {
-        return err_message("Can't operate with dirty git working directory!");
+        return err_message("Can't operate with dirty git working directory! Clear or commit changes!");
     }
 
     if try!(has_staged_changes()) {
-        return err_message("Can't operate with non empty git staging area!");
+        return err_message("Can't operate with non empty git staging area! Clear or commit staged changes!");
+    }
+
+    let local_head = try!(local_head());
+    try!(remote_update());
+    let remote_head = try!(remote_head());
+    if local_head != remote_head {
+        return err_message("Can't operate with diverging local and remote git repository! Syncronize them!")
     }
 
     Ok(())
@@ -36,4 +44,35 @@ fn has_staged_changes() -> CrResult<bool> {
         .output());
 
     Ok(output.status.code() == Some(1))
+}
+
+/// Update the local refs to the remote repository.
+fn remote_update() -> CrResult<()> {
+    let output = try!(Command::new("git")
+        .arg("remote")
+        .arg("update")
+        .output());
+
+    try!(check_output(&output));
+    Ok(())
+}
+
+type CommitHash = String;
+
+fn local_head() -> CrResult<CommitHash> {
+    commit_hash("@")
+}
+
+fn remote_head() -> CrResult<CommitHash> {
+    commit_hash("@{u}")
+}
+
+fn commit_hash(refname: &str) -> CrResult<CommitHash> {
+    let output = try!(Command::new("git")
+        .arg("rev-parse")
+        .arg(refname)
+        .output());
+
+    try!(check_output(&output));
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }

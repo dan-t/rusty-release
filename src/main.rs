@@ -14,6 +14,7 @@ mod version_kind;
 mod config;
 mod cargo_proj;
 mod cargo;
+mod utils;
 
 fn main() {
     execute().unwrap_or_else(|err| {
