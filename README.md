@@ -33,7 +33,7 @@ inside of the cargo project should start the release process:
 
 * Runs the tests.
 
-* The the current version is read from the `Cargo.toml` and incremented according to
+* The current version is read from the `Cargo.toml` and incremented according to
   `<VERSION>` and written back to the `Cargo.toml`.
 
 * Builds a release.
