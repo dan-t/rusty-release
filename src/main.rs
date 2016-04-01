@@ -62,11 +62,15 @@ fn execute() -> CrResult<()> {
         try!(update_changelog(changelog, &new_version));
     }
 
+    try!(writeln!(stdout, "Creating git commit ..."));
     try!(git::add_update());
     try!(git::commit(&commit_message(&cargo_proj)));
     try!(git::tag(&tag_name(&cargo_proj)));
+
+    try!(writeln!(stdout, "Pushing git changes ..."));
     try!(git::push());
 
+    try!(writeln!(stdout, "Publishing to crates.io ..."));
     try!(cargo::publish());
 
     Ok(())
