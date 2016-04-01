@@ -13,6 +13,7 @@ mod cr_result;
 mod version_kind;
 mod config;
 mod cargo_proj;
+mod cargo;
 
 fn main() {
     execute().unwrap_or_else(|err| {
@@ -23,12 +24,21 @@ fn main() {
 
 fn execute() -> CrResult<()> {
     let config = try!(Config::from_command_args());
-    println!("{:?}", config);
-    let cargo_proj = try!(CargoProj::find(&config.start_dir));
-    println!("{:?}", cargo_proj);
-    let root_dir = try!(cargo_proj.root_dir());
-    println!("root_dir: {:?}", root_dir);
-    let _ = try!(std::env::set_current_dir(root_dir));
-    let _ = try!(git::check_clean_state());
+    let mut cargo_proj = try!(CargoProj::find(&config.start_dir));
+
+    try!(std::env::set_current_dir(try!(cargo_proj.root_dir())));
+
+    println!("Checking git state ...");
+    try!(git::check_clean_state());
+
+    let version = config.version_kind.increment(cargo_proj.version());
+    try!(cargo_proj.write_version(&version));
+
+    println!("Building release ...");
+    try!(cargo::build_release());
+
+    println!("Testing ...");
+    try!(cargo::test());
+
     Ok(())
 }
