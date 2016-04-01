@@ -2,6 +2,10 @@
 name = "cargo-release"
 version = "0.1.0"
 authors = ["Daniel Trstenjak <daniel.trstenjak@gmail.com>"]
+license = "BSD-3-Clause"
+description = "Make a release of a cargo project"
+repository = "https://github.com/dan-t/cargo-release"
+readme = "README.md"
 
 [dependencies]
 clap = "~2.2.4"
