@@ -1,5 +1,5 @@
 use std::io::{Read, Write};
-use std::fs::{self, File};
+use std::fs::{self, File, OpenOptions};
 use std::path::{Path, PathBuf};
 use std::ffi::OsStr;
 use toml;
@@ -62,25 +62,39 @@ impl CargoProj {
         &self.version
     }
 
+    /// Write the new `version` into the `Cargo.toml`.
+    pub fn write_version(&mut self, version: &Version) -> CrResult<()> {
+        let contents = {
+            let mut file = try!(File::open(&self.cargo_toml));
+            let mut contents = String::new();
+            try!(file.read_to_string(&mut contents));
+            contents
+        };
+
+        let contents = contents.replace(&format!("version = \"{}\"", self.version),
+                                        &format!("version = \"{}\"", version));
+        {
+            let mut file = try!(OpenOptions::new()
+                .truncate(true)
+                .read(true)
+                .write(true)
+                .open(&self.cargo_toml));
+
+            try!(file.write_all(contents.as_bytes()));
+        }
+
+        self.version = version.clone();
+        Ok(())
+    }
+
     /// The root directory of the cargo project.
     pub fn root_dir(&self) -> CrResult<&Path> {
         self.cargo_toml.parent()
             .ok_or_else(|| cr_err_message(format!("Couldn't get directory of path: {:?}", self.cargo_toml)))
     }
 
-    /// Write the new `version` into the `Cargo.toml`.
-    pub fn write_version(&mut self, version: &Version) -> CrResult<()> {
-        let mut file = try!(File::open(&self.cargo_toml));
-
-        let mut contents = String::new();
-        try!(file.read_to_string(&mut contents));
-        let contents = contents.replace(&format!("version = \"{}\"", self.version),
-                                        &format!("version = \"{}\"", version));
-
-        println!("version = \"{}\"", version);
-//        try!(file.write_all(contents.as_bytes()));
-        self.version = version.clone();
-        Ok(())
+    pub fn changelog(&self) -> Option<&Path> {
+        self.changelog.as_ref().map(|p| p.as_path())
     }
 }
 

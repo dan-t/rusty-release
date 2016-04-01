@@ -23,6 +23,52 @@ pub fn check_clean_state() -> CrResult<()> {
     Ok(())
 }
 
+pub fn add_update() -> CrResult<()> {
+    let output = try!(Command::new("git")
+        .arg("add")
+        .arg("--update")
+        .output());
+
+    try!(check_output(&output));
+    Ok(())
+}
+
+pub fn commit(msg: &str) -> CrResult<()> {
+    let output = try!(Command::new("git")
+        .arg("commit")
+        .arg(format!("--message={}", msg))
+        .output());
+
+    try!(check_output(&output));
+    Ok(())
+}
+
+pub fn tag(name: &str) -> CrResult<()> {
+    let output = try!(Command::new("git")
+        .arg("tag")
+        .arg(name)
+        .output());
+
+    try!(check_output(&output));
+    Ok(())
+}
+
+pub fn push() -> CrResult<()> {
+    let output = try!(Command::new("git")
+        .arg("push")
+        .output());
+
+    try!(check_output(&output));
+
+    let output = try!(Command::new("git")
+        .arg("push")
+        .arg("--tags")
+        .output());
+
+    try!(check_output(&output));
+    Ok(())
+}
+
 /// If the working directory has uncommited changes.
 fn has_dirty_working_dir() -> CrResult<bool> {
     let output = try!(Command::new("git")
