@@ -47,15 +47,15 @@ fn execute() -> CrResult<()> {
     try!(writeln!(stdout, "Checking git state ..."));
     try!(git::check_clean_state());
 
+    try!(writeln!(stdout, "Testing ..."));
+    try!(cargo::test());
+
     let curr_version = cargo_proj.version().clone();
     let new_version = config.version_kind.increment(&curr_version);
     try!(cargo_proj.write_version(&new_version));
 
     try!(writeln!(stdout, "Building release ..."));
     try!(cargo::build_release());
-
-    try!(writeln!(stdout, "Testing ..."));
-    try!(cargo::test());
 
     if let Some(changelog) = cargo_proj.changelog() {
         try!(writeln!(stdout, "Updating changelog ..."));
