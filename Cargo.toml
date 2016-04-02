@@ -1,6 +1,6 @@
 [package]
 name = "cargo-release"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Daniel Trstenjak <daniel.trstenjak@gmail.com>"]
 license = "BSD-3-Clause"
 description = "Make a release of a cargo project"
