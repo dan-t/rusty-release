@@ -1,10 +1,10 @@
-use std::io::{Read, Write};
-use std::fs::{self, File, OpenOptions};
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::ffi::OsStr;
 use toml;
 use semver::Version;
 use cr_result::{CrResult, err_message, cr_err_message};
+use utils::{modify_file, map_file};
 
 #[derive(Debug)]
 pub struct CargoProj {
@@ -64,24 +64,10 @@ impl CargoProj {
 
     /// Write the new `version` into the `Cargo.toml`.
     pub fn write_version(&mut self, version: &Version) -> CrResult<()> {
-        let contents = {
-            let mut file = try!(File::open(&self.cargo_toml));
-            let mut contents = String::new();
-            try!(file.read_to_string(&mut contents));
-            contents
-        };
-
-        let contents = contents.replace(&format!("version = \"{}\"", self.version),
-                                        &format!("version = \"{}\"", version));
-        {
-            let mut file = try!(OpenOptions::new()
-                .truncate(true)
-                .read(true)
-                .write(true)
-                .open(&self.cargo_toml));
-
-            try!(file.write_all(contents.as_bytes()));
-        }
+        try!(modify_file(&self.cargo_toml, |contents| {
+            contents.replace(&format!("version = \"{}\"", self.version),
+                             &format!("version = \"{}\"", version))
+        }));
 
         self.version = version.clone();
         Ok(())
@@ -152,11 +138,10 @@ fn find_changelog(dir: &Path) -> CrResult<Option<PathBuf>> {
 }
 
 fn parse_toml(path: &Path) -> CrResult<toml::Value> {
-    let mut file = try!(File::open(path));
-    let mut string = String::new();
-    try!(file.read_to_string(&mut string));
-    let mut parser = toml::Parser::new(&string);
-    parser.parse()
-        .map(toml::Value::Table)
-        .ok_or_else(|| cr_err_message(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors)))
+    map_file(path, |contents| {
+        let mut parser = toml::Parser::new(&contents);
+        parser.parse()
+            .map(toml::Value::Table)
+            .ok_or_else(|| cr_err_message(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors)))
+    })
 }

@@ -5,15 +5,14 @@ extern crate semver;
 extern crate term;
 extern crate tempfile;
 
-use std::io::{Read, Write};
-use std::fs::{File, OpenOptions};
+use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use semver::Version;
 use cr_result::{CrResult, err_message};
 use config::Config;
 use cargo_proj::CargoProj;
-use utils::check_output;
+use utils::{check_output, modify_file};
 
 mod git;
 mod cr_result;
@@ -96,23 +95,7 @@ fn update_changelog(changelog: &Path,
                     curr_version: &Version,
                     new_version: &Version)
                     -> CrResult<()> {
-    let contents = {
-        let mut file = try!(File::open(changelog));
-        let mut contents = String::new();
-        try!(file.read_to_string(&mut contents));
-        contents
-    };
-
-    let contents = format!("{}\n\n{}", new_version, contents);
-    {
-        let mut file = try!(OpenOptions::new()
-            .truncate(true)
-            .read(true)
-            .write(true)
-            .open(changelog));
-
-        try!(file.write_all(contents.as_bytes()));
-    }
+    try!(modify_file(changelog, |contents| { format!("{}\n\n{}", new_version, contents) }));
 
     let log_file = try!(git::log_file("HEAD", &tag_name(proj_name, curr_version)));
 
