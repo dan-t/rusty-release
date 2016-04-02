@@ -20,9 +20,9 @@ new version number at the top of the Changelog and open it.
 Installation
 ============
 
-    $ `git clone https://github.com/dan-t/cargo-release.git`
-    $ `cd cargo-release`
-    $ `cargo build --release`
+    $ git clone https://github.com/dan-t/cargo-release.git
+    $ cd cargo-release
+    $ cargo build --release
 
 The build binary will be located at `target/release/cargo-release`.
 
