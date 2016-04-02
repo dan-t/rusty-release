@@ -1,6 +1,6 @@
 use std::process::Output;
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::{Read, Write, Seek, SeekFrom};
 use std::path::Path;
 use cr_result::{CrResult, err_message};
 
@@ -27,9 +27,8 @@ pub fn modify_file<F>(file: &Path, f: F) -> CrResult<()>
 
     let contents = f(contents);
 
-    // truncate file
-    try!(file.set_len(0));
-
+    try!(file.set_len(contents.as_bytes().len() as u64));
+    try!(file.seek(SeekFrom::Start(0)));
     try!(file.write_all(contents.as_bytes()));
     Ok(())
 }
