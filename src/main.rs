@@ -24,21 +24,27 @@ mod cargo;
 mod utils;
 
 fn main() {
-    set_stdout_stderr_colors();
-
     let mut exit_code = 0;
     execute().unwrap_or_else(|err| {
         let mut stderr = term::stderr().unwrap();
+        stderr.fg(term::color::RED).unwrap();
+
         writeln!(stderr, "{}", err).unwrap();
         exit_code = 1;
     });
 
-    reset_stdout_stderr();
+    let mut stdout = term::stdout().unwrap();
+    stdout.reset().unwrap();
+
+    let mut stderr = term::stderr().unwrap();
+    stderr.reset().unwrap();
+
     std::process::exit(exit_code);
 }
 
 fn execute() -> CrResult<()> {
     let mut stdout = term::stdout().unwrap();
+    try!(stdout.fg(term::color::GREEN));
 
     let config = try!(Config::from_command_args());
     let mut cargo_proj = try!(CargoProj::find(&config.start_dir));
@@ -132,20 +138,4 @@ fn commit_message(proj_name: &str, version: &Version) -> String {
 
 fn tag_name(proj_name: &str, version: &Version) -> String {
     format!("{}-{}", proj_name, version)
-}
-
-fn set_stdout_stderr_colors() {
-    let mut stdout = term::stdout().unwrap();
-    stdout.fg(term::color::GREEN).unwrap();
-
-    let mut stderr = term::stderr().unwrap();
-    stderr.fg(term::color::RED).unwrap();
-}
-
-fn reset_stdout_stderr() {
-    let mut stdout = term::stdout().unwrap();
-    stdout.reset().unwrap();
-
-    let mut stderr = term::stderr().unwrap();
-    stderr.reset().unwrap();
 }
