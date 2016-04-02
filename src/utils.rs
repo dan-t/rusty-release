@@ -2,6 +2,8 @@ use std::process::Output;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write, Seek, SeekFrom};
 use std::path::Path;
+use std::process::Command;
+use std::env;
 use cr_result::{CrResult, err_message};
 
 pub fn check_output(out: &Output) -> CrResult<()> {
@@ -45,4 +47,20 @@ pub fn map_file<R, F>(file: &Path, f: F) -> CrResult<R>
 
     let r = try!(f(contents));
     Ok(r)
+}
+
+pub fn editor_command() -> CrResult<Command> {
+    let editor = env::var("CARGO_RELEASE_EDITOR").unwrap_or("gvim -o".to_string());
+    if editor.len() == 0 {
+        return err_message("Invalid, empty command defined for CARGO_RELEASE_EDITOR!");
+    }
+
+    let editor_and_args = editor.split(' ').collect::<Vec<&str>>();
+    let mut cmd = Command::new(editor_and_args[0]);
+    let args = editor_and_args.iter().skip(1);
+    for arg in args {
+        cmd.arg(arg);
+    }
+
+    Ok(cmd)
 }

@@ -7,12 +7,11 @@ extern crate tempfile;
 
 use std::io::Write;
 use std::path::Path;
-use std::process::Command;
 use semver::Version;
-use cr_result::{CrResult, err_message};
+use cr_result::CrResult;
 use config::Config;
 use cargo_proj::CargoProj;
-use utils::{check_output, modify_file};
+use utils::{check_output, modify_file, editor_command};
 
 mod git;
 mod cr_result;
@@ -99,18 +98,7 @@ fn update_changelog(changelog: &Path,
 
     let log_file = try!(git::log_file("HEAD", &tag_name(proj_name, curr_version)));
 
-    let editor_cmd = std::env::var("CARGO_RELEASE_EDITOR").unwrap_or("gvim -o".to_string());
-    if editor_cmd.len() == 0 {
-        return err_message("Invalid command defined for CARGO_RELEASE_EDITOR!");
-    }
-
-    let editor_and_args = editor_cmd.split(' ').collect::<Vec<&str>>();
-    let mut cmd = Command::new(editor_and_args[0]);
-    let args = editor_and_args.iter().skip(1);
-    for arg in args {
-        cmd.arg(arg);
-    }
-
+    let mut cmd = try!(editor_command());
     let output = try!(cmd.arg(changelog)
         .arg(log_file.path())
         .output());
