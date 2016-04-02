@@ -8,7 +8,7 @@ extern crate tempfile;
 use std::io::Write;
 use std::path::Path;
 use semver::Version;
-use cr_result::CrResult;
+use cr_result::{CrResult, CrErr};
 use config::Config;
 use cargo_proj::CargoProj;
 use utils::{check_output, modify_file, editor_command};
@@ -24,10 +24,17 @@ mod utils;
 fn main() {
     let mut exit_code = 0;
     execute().unwrap_or_else(|err| {
-        let mut stderr = term::stderr().unwrap();
-        stderr.fg(term::color::RED).unwrap();
+        match err {
+            CrErr::Message(_) => {
+                let mut stderr = term::stderr().unwrap();
+                stderr.fg(term::color::RED).unwrap();
 
-        writeln!(stderr, "{}", err).unwrap();
+                writeln!(stderr, "{}", err).unwrap();
+            }
+
+            CrErr::ClapDisplaysInfo(_) => {}
+        }
+
         exit_code = 1;
     });
 
@@ -41,13 +48,12 @@ fn main() {
 }
 
 fn execute() -> CrResult<()> {
-    let mut stdout = term::stdout().unwrap();
-    try!(stdout.fg(term::color::GREEN));
-
     let config = try!(Config::from_command_args());
     let mut cargo_proj = try!(CargoProj::find(&config.start_dir));
-
     try!(std::env::set_current_dir(try!(cargo_proj.root_dir())));
+
+    let mut stdout = term::stdout().unwrap();
+    try!(stdout.fg(term::color::GREEN));
 
     try!(writeln!(stdout, "Checking git state ..."));
     try!(git::check_clean_state());

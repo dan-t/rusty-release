@@ -22,7 +22,7 @@ pub struct Config {
 
 impl Config {
    pub fn from_command_args() -> CrResult<Config> {
-       let matches = App::new("cargo-release")
+       let matches = try!(App::new("cargo-release")
            .about("Make a release for a cargo project")
            .version(crate_version!())
            .author("Daniel Trstenjak <daniel.trstenjak@gmail.com>")
@@ -35,7 +35,7 @@ impl Config {
                 .takes_value(true))
            .arg_from_usage("-n --no-publish 'Do not publish to crates.io'")
            .arg_from_usage("-N --no-push 'Do not push to remote git repository'")
-           .get_matches();
+           .get_matches_safe());
 
        let start_dir = matches.value_of("start-dir")
            .map(PathBuf::from)
