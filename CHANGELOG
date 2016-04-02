@@ -1,3 +1,7 @@
+0.2.1
+-----
+* Add options '--no-publish' and '--no-push'
+
 0.2.0
 -----
 * Show commits from HEAD till last release beside of changelog in editor
