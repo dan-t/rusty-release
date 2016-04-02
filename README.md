@@ -47,8 +47,9 @@ inside of the cargo project should start the release process:
 
   Every file which lower case base name is equal to `changelog` is considered as a changelog file.
 
-  The default editor for opening files is `gvim -o` and can be configured with the environment
-  variable `CARGO_RELEASE_EDITOR`.
+  The default editor for opening the files is `gvim -o` and can be configured with the environment
+  variable `CARGO_RELEASE_EDITOR`. For the best experience the editor should be able to open
+  the files in a split view.
 
 * A git commit is created containing the changed and not ignored files with the message
   `<PROJ_NAME> <NEW_VERSION>`, where `<PROJ_NAME>` is the cargo project name and `<NEW_VERSION>`
