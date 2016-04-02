@@ -60,3 +60,18 @@ inside of the cargo project should start the release process:
 * The git commit and tag are pushed to the remote repository.
 
 * `cargo publish` is called.
+
+Configuration
+=============
+
+Currently there's no configuration regarding the commit message and the tag name. But I'm quite
+open to add a configuration file like:
+
+    [commit]
+    message = "<PROJ_NAME> <NEW_VERSION>"
+
+    [tag]
+    name = "v<NEW_VERSION>"
+
+So there would be some placeholders like `<PROJ_NAME>` and `<NEW_VERSION>` which could be
+used to define your own commit message and tag name.
