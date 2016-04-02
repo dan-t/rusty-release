@@ -50,8 +50,8 @@ fn execute() -> CrResult<()> {
 
     try!(std::env::set_current_dir(try!(cargo_proj.root_dir())));
 
-    try!(writeln!(stdout, "Checking git state ..."));
-    try!(git::check_clean_state());
+//    try!(writeln!(stdout, "Checking git state ..."));
+//    try!(git::check_clean_state());
 
     try!(writeln!(stdout, "Testing ..."));
     try!(cargo::test());
