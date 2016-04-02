@@ -14,10 +14,10 @@ pub struct Config {
     pub start_dir: PathBuf,
 
     /// publish to crates.io
-    pub publish: bool,
+    pub cargo_publish: bool,
 
     /// push to git remote repository
-    pub push: bool
+    pub git_push: bool
 }
 
 impl Config {
@@ -33,8 +33,8 @@ impl Config {
                 .value_names(&["DIR"])
                 .help("Start directory for the search of the Cargo.toml (default: current working directory)")
                 .takes_value(true))
-           .arg_from_usage("-n --no-publish 'Do not publish to crates.io'")
-           .arg_from_usage("-N --no-push 'Do not push to remote git repository'")
+           .arg_from_usage("-n --no-cargo-publish 'Do not publish to crates.io'")
+           .arg_from_usage("-N --no-git-push 'Do not push to remote git repository'")
            .get_matches_safe());
 
        let start_dir = matches.value_of("start-dir")
@@ -48,8 +48,8 @@ impl Config {
        Ok(Config {
            version_kind: value_t_or_exit!(matches.value_of("VERSION_KIND"), VersionKind),
            start_dir: start_dir,
-           publish: ! matches.is_present("no-publish"),
-           push: ! matches.is_present("no-push")
+           cargo_publish: ! matches.is_present("no-cargo-publish"),
+           git_push: ! matches.is_present("no-git-push")
        })
    }
 }

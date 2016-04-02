@@ -78,12 +78,12 @@ fn execute() -> CrResult<()> {
     try!(git::commit(&commit_message(cargo_proj.name(), cargo_proj.version())));
     try!(git::tag(&tag_name(cargo_proj.name(), cargo_proj.version())));
 
-    if config.push {
+    if config.git_push {
         try!(writeln!(stdout, "Pushing git changes ..."));
         try!(git::push());
     }
 
-    if config.publish {
+    if config.cargo_publish {
         try!(writeln!(stdout, "Publishing to crates.io ..."));
         try!(cargo::publish());
     }
