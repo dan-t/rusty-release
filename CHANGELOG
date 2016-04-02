@@ -1,3 +1,7 @@
+0.2.3
+-----
+* Better handling of early exiting clap and terminal colors
+
 0.2.2
 -----
 * Minor internal cleanup
