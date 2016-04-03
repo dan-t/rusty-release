@@ -1,11 +1,13 @@
 use std::env;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use clap::{App, Arg};
 use toml;
 use rustc_serialize::Decodable;
 use rr_result::{RrResult, err_message, rr_error_message};
 use version_kind::VersionKind;
 use utils::map_file;
+use cargo_proj::CargoProj;
 
 /// The configuration used to run `rusty-release`.
 #[derive(Debug)]
@@ -20,7 +22,30 @@ pub struct Config {
     pub cargo_publish: bool,
 
     /// push to git remote repository
-    pub git_push: bool
+    pub git_push: bool,
+
+    /// string template for the commit message
+    commit_message: String,
+
+    /// string template for the tag name
+    tag_name: String,
+
+    /// the editor command, used for opening of the changelog
+    editor: String
+}
+
+/// Helper macro to apply the settings from ConfigFromFile to Config
+macro_rules! config {
+    ( $file_config:ident, [ $( $field_name:ident ),* ]) => {{
+        let mut config = try!(Config::default());
+        $(
+            if let Some(f) = $file_config.$field_name {
+                config.$field_name = f;
+            }
+        )*
+
+        config
+    }}
 }
 
 impl Config {
@@ -60,7 +85,27 @@ impl Config {
            config.git_push = ! matches.is_present("no-git-push");
        }
 
+       try!(config.check());
        Ok(config)
+   }
+
+   pub fn commit_message(&self) -> Template {
+       Template(self.commit_message.clone())
+   }
+
+   pub fn tag_name(&self) -> Template {
+       Template(self.tag_name.clone())
+   }
+
+   pub fn editor(&self) -> Command {
+       let editor_and_args = self.editor.split(' ').collect::<Vec<&str>>();
+       let mut cmd = Command::new(editor_and_args[0]);
+       let args = editor_and_args.iter().skip(1);
+       for arg in args {
+           cmd.arg(arg);
+       }
+
+       cmd
    }
 
    fn from_file() -> RrResult<Config> {
@@ -74,14 +119,13 @@ impl Config {
            (None     , None)      => ConfigFromFile::default()
        };
 
-       let mut config = try!(Config::default());
-       if let Some(p) = file_config.cargo_publish {
-           config.cargo_publish = p;
-       }
-
-       if let Some(p) = file_config.git_push {
-           config.git_push = p;
-       }
+       let config = config!(file_config, [
+           cargo_publish,
+           git_push,
+           commit_message,
+           tag_name,
+           editor
+       ]);
 
        Ok(config)
    }
@@ -91,16 +135,52 @@ impl Config {
            version_kind: VersionKind::Patch,
            start_dir: try!(env::current_dir()),
            cargo_publish: true,
-           git_push: true
+           git_push: true,
+           commit_message: "<PROJ_NAME> <NEW_VERSION>".to_string(),
+           tag_name: "<PROJ_NAME>-<NEW_VERSION>".to_string(),
+           editor: "gvim -o".to_string()
        })
+   }
+
+   fn check(&self) -> RrResult<()> {
+       if self.commit_message.is_empty() {
+           return err_message("Invalid, empty commit message!");
+       }
+
+       if self.tag_name.is_empty() {
+           return err_message("Invalid empty tag name!");
+       }
+
+       if self.editor.is_empty() {
+           return err_message("Invalid, empty editor command!");
+       }
+
+       Ok(())
    }
 }
 
+/// Represents a string template that contains placeholders that can be replaced.
+/// Currently only the placeholders '<PROJ_NAME>' - representing the name of the
+/// cargo project and '<NEW_VERSION>' - representing the version of the release -
+/// are supported.
+#[derive(Debug)]
+pub struct Template(String);
+
+impl Template {
+    pub fn render(&self, proj: &CargoProj) -> String {
+        self.0.replace("<PROJ_NAME>", &format!("{}", proj.name()))
+            .replace("<NEW_VERSION>", &format!("{}", proj.version()))
+    }
+}
+
 /// Represents the data from a `.rusty-release.toml` configuration file.
-#[derive(RustcDecodable, Debug)]
+#[derive(RustcDecodable, Debug, Default)]
 struct ConfigFromFile {
     pub cargo_publish: Option<bool>,
-    pub git_push: Option<bool>
+    pub git_push: Option<bool>,
+    pub commit_message: Option<String>,
+    pub tag_name: Option<String>,
+    pub editor: Option<String>
 }
 
 impl ConfigFromFile {
@@ -138,14 +218,10 @@ impl ConfigFromFile {
     fn combine(&self, other: &ConfigFromFile) -> ConfigFromFile {
         ConfigFromFile {
             cargo_publish: self.cargo_publish.or(other.cargo_publish),
-            git_push: self.git_push.or(other.git_push)
-        }
-    }
-
-    fn default() -> ConfigFromFile {
-        ConfigFromFile {
-            cargo_publish: None,
-            git_push: None
+            git_push: self.git_push.or(other.git_push),
+            commit_message: self.commit_message.clone().or(other.commit_message.clone()),
+            tag_name: self.tag_name.clone().or(other.tag_name.clone()),
+            editor: self.editor.clone().or(other.editor.clone())
         }
     }
 }

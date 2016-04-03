@@ -8,11 +8,12 @@ extern crate rustc_serialize;
 
 use std::io::Write;
 use std::path::Path;
+use std::process::Command;
 use semver::Version;
 use rr_result::{RrResult, RrError};
 use config::Config;
 use cargo_proj::CargoProj;
-use utils::{check_output, modify_file, editor_command};
+use utils::{check_output, modify_file};
 
 mod git;
 mod rr_result;
@@ -63,6 +64,8 @@ fn execute() -> RrResult<()> {
     try!(cargo::test());
 
     let curr_version = cargo_proj.version().clone();
+    let tag_name_curr_version = config.tag_name().render(&cargo_proj);
+
     let new_version = config.version_kind.increment(&curr_version);
     try!(cargo_proj.write_version(&new_version));
 
@@ -71,13 +74,13 @@ fn execute() -> RrResult<()> {
 
     if let Some(changelog) = cargo_proj.changelog() {
         try!(writeln!(stdout, "Updating changelog ..."));
-        try!(update_changelog(changelog, cargo_proj.name(), &curr_version, &new_version));
+        try!(update_changelog(config.editor(), changelog, &tag_name_curr_version, &new_version));
     }
 
     try!(writeln!(stdout, "Creating git commit ..."));
     try!(git::add_update());
-    try!(git::commit(&commit_message(cargo_proj.name(), cargo_proj.version())));
-    try!(git::tag(&tag_name(cargo_proj.name(), cargo_proj.version())));
+    try!(git::commit(&config.commit_message().render(&cargo_proj)));
+    try!(git::tag(&config.tag_name().render(&cargo_proj)));
 
     if config.git_push {
         try!(writeln!(stdout, "Pushing git changes ..."));
@@ -94,30 +97,20 @@ fn execute() -> RrResult<()> {
 
 /// Adds `new_version` at the top of the `changelog` and opens
 /// `changelog` and a temporary file containing the commits from
-/// HEAD till the last release in the editor specified by
-/// `CARGO_RELEASE_EDITOR` (default: gvim -o).
-fn update_changelog(changelog: &Path,
-                    proj_name: &str,
-                    curr_version: &Version,
+/// HEAD till the last release.
+fn update_changelog(mut editor_cmd: Command,
+                    changelog: &Path,
+                    tag_name_curr_version: &str,
                     new_version: &Version)
                     -> RrResult<()> {
     try!(modify_file(changelog, |contents| { format!("{}\n\n{}", new_version, contents) }));
 
-    let log_file = try!(git::log_file("HEAD", &tag_name(proj_name, curr_version)));
+    let log_file = try!(git::log_file("HEAD", tag_name_curr_version));
 
-    let mut cmd = try!(editor_command());
-    let output = try!(cmd.arg(changelog)
+    let output = try!(editor_cmd.arg(changelog)
         .arg(log_file.path())
         .output());
 
     try!(check_output(&output));
     Ok(())
-}
-
-fn commit_message(proj_name: &str, version: &Version) -> String {
-    format!("{} {}", proj_name, version)
-}
-
-fn tag_name(proj_name: &str, version: &Version) -> String {
-    format!("{}-{}", proj_name, version)
 }
