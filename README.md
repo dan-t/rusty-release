@@ -22,7 +22,7 @@ Installation
 
     $ cargo install rusty-release
 
-The build binary will be located at `.cargo/bin/rusty-release`.
+The build binary will be located at `~/.cargo/bin/rusty-release`.
 
 Usage
 =====
