@@ -20,11 +20,9 @@ new version number at the top of the Changelog and open it.
 Installation
 ============
 
-    $ git clone https://github.com/dan-t/rusty-release.git
-    $ cd rusty-release
-    $ cargo build --release
+    $ cargo install rusty-release
 
-The build binary will be located at `target/release/rusty-release`.
+The build binary will be located at `.cargo/bin/rusty-release`.
 
 Usage
 =====
