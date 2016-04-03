@@ -1,3 +1,11 @@
+0.3.0
+-----
+* Rename command 'cargo-release' -> 'rusty-release'
+* Rename option '--no-publish' -> '--no-cargo-publish'
+* Rename option '--no-push' -> '--no-git-push'
+* Add configuration file '.rusty-release.toml' 
+* Configurable commit message, tag name and editor by '.rusty-release.toml'
+
 0.2.3
 -----
 * Better handling of early exiting clap and terminal colors
