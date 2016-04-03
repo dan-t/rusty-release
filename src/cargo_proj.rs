@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::ffi::OsStr;
 use toml;
 use semver::Version;
-use cr_result::{CrResult, err_message, cr_err_message};
+use rr_result::{RrResult, err_message, rr_error_message};
 use utils::{modify_file, map_file};
 
 #[derive(Debug)]
@@ -24,7 +24,7 @@ pub struct CargoProj {
 impl CargoProj {
     /// Searches for the root directory (containing a `Cargo.toml`) of the cargo project starting
     /// at `start_dir` and continuing the search upwards the directory tree until it's found.
-    pub fn find(start_dir: &Path) -> CrResult<CargoProj> {
+    pub fn find(start_dir: &Path) -> RrResult<CargoProj> {
         let cargo_dir = try!(find_cargo_toml_dir(start_dir));
 
         let cargo_toml = cargo_dir.join("Cargo.toml");
@@ -32,12 +32,12 @@ impl CargoProj {
 
         let name = try!(toml.lookup("package.name")
             .and_then(toml::Value::as_str)
-            .ok_or_else(|| cr_err_message(format!("Couldn't get 'package.name' string from: {:?}", toml))));
+            .ok_or_else(|| rr_error_message(format!("Couldn't get 'package.name' string from: {:?}", toml))));
 
         let version = {
             let version_str = try!(toml.lookup("package.version")
                 .and_then(toml::Value::as_str)
-                .ok_or_else(|| cr_err_message(format!("Couldn't get 'package.version' string from: {:?}", toml))));
+                .ok_or_else(|| rr_error_message(format!("Couldn't get 'package.version' string from: {:?}", toml))));
 
             try!(Version::parse(version_str))
         };
@@ -63,7 +63,7 @@ impl CargoProj {
     }
 
     /// Write the new `version` into the `Cargo.toml`.
-    pub fn write_version(&mut self, version: &Version) -> CrResult<()> {
+    pub fn write_version(&mut self, version: &Version) -> RrResult<()> {
         try!(modify_file(&self.cargo_toml, |contents| {
             contents.replace(&format!("version = \"{}\"", self.version),
                              &format!("version = \"{}\"", version))
@@ -74,9 +74,9 @@ impl CargoProj {
     }
 
     /// The root directory of the cargo project.
-    pub fn root_dir(&self) -> CrResult<&Path> {
+    pub fn root_dir(&self) -> RrResult<&Path> {
         self.cargo_toml.parent()
-            .ok_or_else(|| cr_err_message(format!("Couldn't get directory of path: {:?}", self.cargo_toml)))
+            .ok_or_else(|| rr_error_message(format!("Couldn't get directory of path: {:?}", self.cargo_toml)))
     }
 
     pub fn changelog(&self) -> Option<&Path> {
@@ -109,7 +109,7 @@ macro_rules! read_files {
 /// Searches for a directory containing a `Cargo.toml` file starting at
 /// `start_dir` and continuing the search upwards the directory tree
 /// until a directory is found.
-fn find_cargo_toml_dir(start_dir: &Path) -> CrResult<PathBuf> {
+fn find_cargo_toml_dir(start_dir: &Path) -> RrResult<PathBuf> {
     let mut dir = start_dir.to_path_buf();
     loop {
         for file in read_files!(&dir) {
@@ -125,7 +125,7 @@ fn find_cargo_toml_dir(start_dir: &Path) -> CrResult<PathBuf> {
 }
 
 /// Searches for an optional changelog file in `dir`.
-fn find_changelog(dir: &Path) -> CrResult<Option<PathBuf>> {
+fn find_changelog(dir: &Path) -> RrResult<Option<PathBuf>> {
     for file in read_files!(dir) {
         if let Some(base_name) = file.file_stem().and_then(OsStr::to_str).map(str::to_lowercase) {
             if base_name == "changelog" {
@@ -137,11 +137,11 @@ fn find_changelog(dir: &Path) -> CrResult<Option<PathBuf>> {
     Ok(None)
 }
 
-fn parse_toml(path: &Path) -> CrResult<toml::Value> {
+fn parse_toml(path: &Path) -> RrResult<toml::Value> {
     map_file(path, |contents| {
         let mut parser = toml::Parser::new(&contents);
         parser.parse()
             .map(toml::Value::Table)
-            .ok_or_else(|| cr_err_message(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors)))
+            .ok_or_else(|| rr_error_message(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors)))
     })
 }

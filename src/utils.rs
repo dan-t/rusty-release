@@ -4,9 +4,9 @@ use std::io::{Read, Write, Seek, SeekFrom};
 use std::path::Path;
 use std::process::Command;
 use std::env;
-use cr_result::{CrResult, err_message};
+use rr_result::{RrResult, err_message};
 
-pub fn check_output(out: &Output) -> CrResult<()> {
+pub fn check_output(out: &Output) -> RrResult<()> {
     if out.status.success() {
         return Ok(());
     }
@@ -16,7 +16,7 @@ pub fn check_output(out: &Output) -> CrResult<()> {
 
 /// Reads `file` into a string which is passed to the function `f`
 /// and the returned string of `f` is written back into `file`.
-pub fn modify_file<F>(file: &Path, f: F) -> CrResult<()>
+pub fn modify_file<F>(file: &Path, f: F) -> RrResult<()>
     where F: FnOnce(String) -> String
 {
     let mut file = try!(OpenOptions::new()
@@ -37,8 +37,8 @@ pub fn modify_file<F>(file: &Path, f: F) -> CrResult<()>
 
 /// Reads `file` into a string which is passed to the function `f`
 /// and its return value is returned by `map_file`.
-pub fn map_file<R, F>(file: &Path, f: F) -> CrResult<R>
-    where F: FnOnce(String) -> CrResult<R>
+pub fn map_file<R, F>(file: &Path, f: F) -> RrResult<R>
+    where F: FnOnce(String) -> RrResult<R>
 {
     let mut file = try!(File::open(file));
 
@@ -49,7 +49,7 @@ pub fn map_file<R, F>(file: &Path, f: F) -> CrResult<R>
     Ok(r)
 }
 
-pub fn editor_command() -> CrResult<Command> {
+pub fn editor_command() -> RrResult<Command> {
     let editor = env::var("CARGO_RELEASE_EDITOR").unwrap_or("gvim -o".to_string());
     if editor.len() == 0 {
         return err_message("Invalid, empty command defined for CARGO_RELEASE_EDITOR!");

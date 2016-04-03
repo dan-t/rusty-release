@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/dan-t/cargo-release.svg?branch=master)](https://travis-ci.org/dan-t/cargo-release)
+[![Build Status](https://travis-ci.org/dan-t/rusty-release.svg?branch=master)](https://travis-ci.org/dan-t/rusty-release)
 
-cargo-release
+rusty-release
 =============
 
 A command line tool to make a semi-automatic release of a cargo project.
@@ -13,23 +13,23 @@ I wanted a simpler tool which I can just run locally and which gives the user
 more control about the new version number and the Changelog.
 
 You've to be explicit about the new version number by specifing which part of
-the version number should be incremented (e.g. `cargo-release minor`) and
-you've to write the Changelog by yourself, `cargo-release` will only put the
+the version number should be incremented (e.g. `rusty-release minor`) and
+you've to write the Changelog by yourself, `rusty-release` will only put the
 new version number at the top of the Changelog and open it.
 
 Installation
 ============
 
-    $ git clone https://github.com/dan-t/cargo-release.git
-    $ cd cargo-release
+    $ git clone https://github.com/dan-t/rusty-release.git
+    $ cd rusty-release
     $ cargo build --release
 
-The build binary will be located at `target/release/cargo-release`.
+The build binary will be located at `target/release/rusty-release`.
 
 Usage
 =====
 
-Calling `cargo-release <VERSION>` - where `<VERSION>` has to be either `major`, `minor` or `patch` -
+Calling `rusty-release <VERSION>` - where `<VERSION>` has to be either `major`, `minor` or `patch` -
 inside of the cargo project should start the release process:
 
 * Checks if the git working tree isn't dirty, that there's nothing staged and that

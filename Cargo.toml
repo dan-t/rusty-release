@@ -1,10 +1,10 @@
 [package]
-name = "cargo-release"
+name = "rusty-release"
 version = "0.2.3"
 authors = ["Daniel Trstenjak <daniel.trstenjak@gmail.com>"]
 license = "BSD-3-Clause"
 description = "Make a release of a cargo project"
-repository = "https://github.com/dan-t/cargo-release"
+repository = "https://github.com/dan-t/rusty-release"
 readme = "README.md"
 
 [dependencies]

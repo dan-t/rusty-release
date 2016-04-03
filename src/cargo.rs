@@ -1,8 +1,8 @@
 use std::process::Command;
-use cr_result::CrResult;
+use rr_result::RrResult;
 use utils::check_output;
 
-pub fn build_release() -> CrResult<()> {
+pub fn build_release() -> RrResult<()> {
     let output = try!(Command::new("cargo")
         .arg("build")
         .arg("--release")
@@ -12,7 +12,7 @@ pub fn build_release() -> CrResult<()> {
     Ok(())
 }
 
-pub fn test() -> CrResult<()> {
+pub fn test() -> RrResult<()> {
     let output = try!(Command::new("cargo")
         .arg("test")
         .output());
@@ -21,7 +21,7 @@ pub fn test() -> CrResult<()> {
     Ok(())
 }
 
-pub fn publish() -> CrResult<()> {
+pub fn publish() -> RrResult<()> {
     let output = try!(Command::new("cargo")
         .arg("publish")
         .output());

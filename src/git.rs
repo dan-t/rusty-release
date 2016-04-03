@@ -1,12 +1,12 @@
 use std::io::Write;
 use std::process::Command;
 use tempfile::{NamedTempFile, NamedTempFileOptions};
-use cr_result::{CrResult, err_message};
+use rr_result::{RrResult, err_message};
 use utils::check_output;
 
 /// Checks if git has a clean state, a non dirty working directory,
 /// an empty stage area and a non diverging local and remote git repository.
-pub fn check_clean_state() -> CrResult<()> {
+pub fn check_clean_state() -> RrResult<()> {
     if try!(has_dirty_working_dir()) {
         return err_message("Can't operate with dirty git working directory! Clear or commit changes!");
     }
@@ -25,7 +25,7 @@ pub fn check_clean_state() -> CrResult<()> {
     Ok(())
 }
 
-pub fn add_update() -> CrResult<()> {
+pub fn add_update() -> RrResult<()> {
     let output = try!(Command::new("git")
         .arg("add")
         .arg("--update")
@@ -35,7 +35,7 @@ pub fn add_update() -> CrResult<()> {
     Ok(())
 }
 
-pub fn commit(msg: &str) -> CrResult<()> {
+pub fn commit(msg: &str) -> RrResult<()> {
     let output = try!(Command::new("git")
         .arg("commit")
         .arg(format!("--message={}", msg))
@@ -45,7 +45,7 @@ pub fn commit(msg: &str) -> CrResult<()> {
     Ok(())
 }
 
-pub fn tag(name: &str) -> CrResult<()> {
+pub fn tag(name: &str) -> RrResult<()> {
     let output = try!(Command::new("git")
         .arg("tag")
         .arg(name)
@@ -55,7 +55,7 @@ pub fn tag(name: &str) -> CrResult<()> {
     Ok(())
 }
 
-pub fn push() -> CrResult<()> {
+pub fn push() -> RrResult<()> {
     let output = try!(Command::new("git")
         .arg("push")
         .output());
@@ -71,7 +71,7 @@ pub fn push() -> CrResult<()> {
     Ok(())
 }
 
-pub fn log_file(from: &str, to: &str) -> CrResult<NamedTempFile> {
+pub fn log_file(from: &str, to: &str) -> RrResult<NamedTempFile> {
     let output = try!(log(from, to));
     let mut log_file = try!(NamedTempFileOptions::new()
         .prefix(&format!("{}...{}___", from, to))
@@ -81,7 +81,7 @@ pub fn log_file(from: &str, to: &str) -> CrResult<NamedTempFile> {
     Ok(log_file)
 }
 
-pub fn log(from: &str, to: &str) -> CrResult<String> {
+pub fn log(from: &str, to: &str) -> RrResult<String> {
     let output = try!(Command::new("git")
         .arg("--no-pager")
         .arg("log")
@@ -96,7 +96,7 @@ pub fn log(from: &str, to: &str) -> CrResult<String> {
 }
 
 /// If the working directory has uncommited changes.
-fn has_dirty_working_dir() -> CrResult<bool> {
+fn has_dirty_working_dir() -> RrResult<bool> {
     let output = try!(Command::new("git")
         .arg("diff-files")
         .arg("--quiet")
@@ -107,7 +107,7 @@ fn has_dirty_working_dir() -> CrResult<bool> {
 }
 
 /// If the stage area contains uncommited changes.
-fn has_staged_changes() -> CrResult<bool> {
+fn has_staged_changes() -> RrResult<bool> {
     let output = try!(Command::new("git")
         .arg("diff-index")
         .arg("--quiet")
@@ -119,7 +119,7 @@ fn has_staged_changes() -> CrResult<bool> {
 }
 
 /// Update the local refs to the remote repository.
-fn remote_update() -> CrResult<()> {
+fn remote_update() -> RrResult<()> {
     let output = try!(Command::new("git")
         .arg("remote")
         .arg("update")
@@ -131,15 +131,15 @@ fn remote_update() -> CrResult<()> {
 
 type CommitHash = String;
 
-fn local_head() -> CrResult<CommitHash> {
+fn local_head() -> RrResult<CommitHash> {
     commit_hash("@")
 }
 
-fn remote_head() -> CrResult<CommitHash> {
+fn remote_head() -> RrResult<CommitHash> {
     commit_hash("@{u}")
 }
 
-fn commit_hash(refname: &str) -> CrResult<CommitHash> {
+fn commit_hash(refname: &str) -> RrResult<CommitHash> {
     let output = try!(Command::new("git")
         .arg("rev-parse")
         .arg(refname)

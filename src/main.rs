@@ -8,13 +8,13 @@ extern crate tempfile;
 use std::io::Write;
 use std::path::Path;
 use semver::Version;
-use cr_result::{CrResult, CrErr};
+use rr_result::{RrResult, RrError};
 use config::Config;
 use cargo_proj::CargoProj;
 use utils::{check_output, modify_file, editor_command};
 
 mod git;
-mod cr_result;
+mod rr_result;
 mod version_kind;
 mod config;
 mod cargo_proj;
@@ -25,14 +25,14 @@ fn main() {
     let mut exit_code = 0;
     execute().unwrap_or_else(|err| {
         match err {
-            CrErr::Message(_) => {
+            RrError::Message(_) => {
                 let mut stderr = term::stderr().unwrap();
                 stderr.fg(term::color::RED).unwrap();
 
                 writeln!(stderr, "{}", err).unwrap();
             }
 
-            CrErr::ClapDisplaysInfo(_) => {}
+            RrError::ClapDisplaysInfo(_) => {}
         }
 
         exit_code = 1;
@@ -47,7 +47,7 @@ fn main() {
     std::process::exit(exit_code);
 }
 
-fn execute() -> CrResult<()> {
+fn execute() -> RrResult<()> {
     let config = try!(Config::from_command_args());
     let mut cargo_proj = try!(CargoProj::find(&config.start_dir));
     try!(std::env::set_current_dir(try!(cargo_proj.root_dir())));
@@ -99,7 +99,7 @@ fn update_changelog(changelog: &Path,
                     proj_name: &str,
                     curr_version: &Version,
                     new_version: &Version)
-                    -> CrResult<()> {
+                    -> RrResult<()> {
     try!(modify_file(changelog, |contents| { format!("{}\n\n{}", new_version, contents) }));
 
     let log_file = try!(git::log_file("HEAD", &tag_name(proj_name, curr_version)));

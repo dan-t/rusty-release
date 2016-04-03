@@ -1,10 +1,10 @@
 use std::env;
 use std::path::PathBuf;
 use clap::{App, Arg};
-use cr_result::{CrResult, err_message};
+use rr_result::{RrResult, err_message};
 use version_kind::VersionKind;
 
-/// The configuration used to run `cargo-release`.
+/// The configuration used to run `rusty-release`.
 #[derive(Debug)]
 pub struct Config {
     /// which part of the project version should be incremented
@@ -21,8 +21,8 @@ pub struct Config {
 }
 
 impl Config {
-   pub fn from_command_args() -> CrResult<Config> {
-       let matches = try!(App::new("cargo-release")
+   pub fn from_command_args() -> RrResult<Config> {
+       let matches = try!(App::new("rusty-release")
            .about("Make a release for a cargo project")
            .version(crate_version!())
            .author("Daniel Trstenjak <daniel.trstenjak@gmail.com>")
