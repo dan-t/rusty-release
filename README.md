@@ -43,19 +43,13 @@ inside of the cargo project should start the release process:
 * Builds a release.
 
 * If available, the changelog - with the new version added at the top - and a temporary
-  file containing all commits from HEAD to the previous release are opened.
+  file containing all commits from HEAD to the previous release are opened in the configured editor.
 
   Every file which lower case base name is equal to `changelog` is considered as a changelog file.
 
-  The default editor for opening the files is `gvim -o` and can be configured with the environment
-  variable `CARGO_RELEASE_EDITOR`. For the best experience the editor should be able to open
-  the files in a split view.
+* A git commit is created containing the changed and not ignored files with the configured commit message.
 
-* A git commit is created containing the changed and not ignored files with the message
-  `<PROJ_NAME> <NEW_VERSION>`, where `<PROJ_NAME>` is the cargo project name and `<NEW_VERSION>`
-  the version of the release.
-
-* A git tag is created with the name `<PROJ_NAME>-<NEW_VERSION>`.
+* A git tag is created with the configured name.
 
 * The git commit and tag are pushed to the remote repository.
 
@@ -64,14 +58,25 @@ inside of the cargo project should start the release process:
 Configuration
 =============
 
-Currently there's no configuration regarding the commit message and the tag name. But I'm quite
-open to add a configuration file like:
+If avialable, the configuration file `.rusty-release.toml` is read from the home directory
+and from the cargo project root directory (where the `Cargo.toml` resides).
 
-    [commit]
-    message = "<PROJ_NAME> <NEW_VERSION>"
+The current supported configuration (default configuration displayed) is:
 
-    [tag]
-    name = "v<NEW_VERSION>"
+    # publish to crates.io
+    cargo_publish = true
 
-So there would be some placeholders like `<PROJ_NAME>` and `<NEW_VERSION>` which could be
-used to define your own commit message and tag name.
+    # push to git remote repository
+    git_push = true
+
+    # string template for the creation of the commit message, currently the two
+    # placeholders '<PROJ_NAME>' - the name of the cargo project - and
+    # '<NEW_VERSION>' - the version of the release - are supported
+    commit_message = "<PROJ_NAME> <NEW_VERSION>"
+
+    # a string template like 'commit_message' supporting the same placeholders
+    tag_name = "<PROJ_NAME>-<NEW_VERSION>"
+
+    # the editor command for opening the changelog, for the best experience the
+    # editor command should be able to open multiple files in a split view
+    editor = "gvim -o"
