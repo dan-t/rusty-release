@@ -4,6 +4,7 @@ extern crate toml;
 extern crate semver;
 extern crate term;
 extern crate tempfile;
+extern crate rustc_serialize;
 
 use std::io::Write;
 use std::path::Path;
@@ -48,7 +49,7 @@ fn main() {
 }
 
 fn execute() -> RrResult<()> {
-    let config = try!(Config::from_command_args());
+    let config = try!(Config::from_file_and_command_args());
     let mut cargo_proj = try!(CargoProj::find(&config.start_dir));
     try!(std::env::set_current_dir(try!(cargo_proj.root_dir())));
 

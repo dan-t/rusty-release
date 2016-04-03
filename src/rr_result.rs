@@ -2,6 +2,7 @@ use std::io;
 use std::convert::From;
 use std::fmt::{self, Display, Formatter};
 use semver::SemVerError;
+use toml::DecodeError;
 use clap;
 use term;
 
@@ -64,5 +65,11 @@ impl From<clap::Error> for RrError {
                 => RrError::ClapDisplaysInfo(msg),
             _   => RrError::Message(msg)
         }
+    }
+}
+
+impl From<DecodeError> for RrError {
+    fn from(err: DecodeError) -> RrError {
+        rr_error_message(format!("{}", err))
     }
 }
