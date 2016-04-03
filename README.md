@@ -9,8 +9,8 @@ There's [semantic-rs](https://github.com/semantic-rs/semantic-rs) which
 wants to be fully automatic by encoding information into the commit messages
 und using it to determine the new version number and to create the Changelog.
 
-I wanted a simpler tool which I can just run locally and which gives the user
-more control about the new version number and the Changelog.
+I wanted a simpler tool which gives the user more control about the new version
+number and the Changelog.
 
 You've to be explicit about the new version number by specifing which part of
 the version number should be incremented (e.g. `rusty-release minor`) and
