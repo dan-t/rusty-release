@@ -105,7 +105,13 @@ fn update_changelog(mut editor_cmd: Command,
                     -> RrResult<()> {
     try!(modify_file(changelog, |contents| { format!("{}\n\n{}", new_version, contents) }));
 
-    let log_file = try!(git::log_file("HEAD", tag_name_curr_version));
+    let log_to = if try!(git::has_tag(tag_name_curr_version)) {
+        Some(tag_name_curr_version)
+    } else {
+        None
+    };
+
+    let log_file = try!(git::log_file("HEAD", log_to));
 
     let output = try!(editor_cmd.arg(changelog)
         .arg(log_file.path())

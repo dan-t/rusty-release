@@ -71,28 +71,44 @@ pub fn push() -> RrResult<()> {
     Ok(())
 }
 
-pub fn log_file(from: &str, to: &str) -> RrResult<NamedTempFile> {
+pub fn log_file(from: &str, to: Option<&str>) -> RrResult<NamedTempFile> {
     let output = try!(log(from, to));
     let mut log_file = try!(NamedTempFileOptions::new()
-        .prefix(&format!("{}...{}___", from, to))
+        .prefix(&format!("{}...{}___", from, to.unwrap_or("")))
         .create());
 
     try!(log_file.write_all(output.as_bytes()));
     Ok(log_file)
 }
 
-pub fn log(from: &str, to: &str) -> RrResult<String> {
+pub fn log(from: &str, to: Option<&str>) -> RrResult<String> {
     let output = try!(Command::new("git")
         .arg("--no-pager")
         .arg("log")
         .arg("--decorate=short")
         .arg("--pretty=oneline")
         .arg("--abbrev-commit")
-        .arg(format!("{}...{}", from, to))
+        .arg(if let Some(to) = to { format!("{}...{}", from, to) } else { from.to_owned() })
         .output());
 
     try!(check_output(&output));
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
+pub fn has_tag(name: &str) -> RrResult<bool> {
+    let output = try!(Command::new("git")
+        .arg("rev-parse")
+        .arg("--verify")
+        .arg("--quiet")
+        .arg(name)
+        .output());
+
+    if output.status.success() {
+        return Ok(true);
+    }
+
+    try!(check_output(&output));
+    Ok(false)
 }
 
 /// If the working directory has uncommited changes.
