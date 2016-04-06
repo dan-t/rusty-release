@@ -219,9 +219,9 @@ impl ConfigFromFile {
         ConfigFromFile {
             cargo_publish: self.cargo_publish.or(other.cargo_publish),
             git_push: self.git_push.or(other.git_push),
-            commit_message: self.commit_message.clone().or(other.commit_message.clone()),
-            tag_name: self.tag_name.clone().or(other.tag_name.clone()),
-            editor: self.editor.clone().or(other.editor.clone())
+            commit_message: self.commit_message.as_ref().or(other.commit_message.as_ref()).cloned(),
+            tag_name: self.tag_name.as_ref().or(other.tag_name.as_ref()).cloned(),
+            editor: self.editor.as_ref().or(other.editor.as_ref()).cloned()
         }
     }
 }
