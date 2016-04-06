@@ -58,7 +58,7 @@ fn execute() -> RrResult<()> {
     try!(stdout.fg(term::color::GREEN));
 
     try!(writeln!(stdout, "Checking git state ..."));
-    try!(git::check_clean_state());
+    try!(git::check_state());
 
     try!(writeln!(stdout, "Testing ..."));
     try!(cargo::test());
