@@ -64,7 +64,7 @@ fn execute() -> RrResult<()> {
     try!(cargo::test());
 
     let curr_version = cargo_proj.version().clone();
-    let tag_name_curr_version = config.tag_name().render(&cargo_proj);
+    let tag_name_curr_version = config.tag_name(&cargo_proj);
 
     let new_version = config.version_kind.increment(&curr_version);
     try!(cargo_proj.write_version(&new_version));
@@ -79,8 +79,8 @@ fn execute() -> RrResult<()> {
 
     try!(writeln!(stdout, "Creating git commit ..."));
     try!(git::add_update());
-    try!(git::commit(&config.commit_message().render(&cargo_proj)));
-    try!(git::tag(&config.tag_name().render(&cargo_proj)));
+    try!(git::commit(&config.commit_message(&cargo_proj)));
+    try!(git::tag(&config.tag_name(&cargo_proj)));
 
     if config.git_push {
         try!(writeln!(stdout, "Pushing git changes ..."));

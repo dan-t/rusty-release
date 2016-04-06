@@ -89,12 +89,12 @@ impl Config {
        Ok(config)
    }
 
-   pub fn commit_message(&self) -> Template {
-       Template(self.commit_message.clone())
+   pub fn commit_message(&self, proj: &CargoProj) -> String {
+       Template(&self.commit_message).render(proj)
    }
 
-   pub fn tag_name(&self) -> Template {
-       Template(self.tag_name.clone())
+   pub fn tag_name(&self, proj: &CargoProj) -> String {
+       Template(&self.tag_name).render(proj)
    }
 
    pub fn editor(&self) -> Command {
@@ -164,9 +164,9 @@ impl Config {
 /// cargo project and '<NEW_VERSION>' - representing the version of the release -
 /// are supported.
 #[derive(Debug)]
-pub struct Template(String);
+struct Template<'a>(&'a str);
 
-impl Template {
+impl<'a> Template<'a> {
     pub fn render(&self, proj: &CargoProj) -> String {
         self.0.replace("<PROJ_NAME>", &format!("{}", proj.name()))
             .replace("<NEW_VERSION>", &format!("{}", proj.version()))
