@@ -56,7 +56,7 @@ inside of the cargo project should start the release process:
 Configuration
 =============
 
-If avialable, the configuration file `.rusty-release.toml` is read from the home directory
+If available, the configuration file `.rusty-release.toml` is read from the home directory
 and from the cargo project root directory (where the `Cargo.toml` resides).
 
 The current supported configuration (default configuration displayed) is:
