@@ -5,8 +5,9 @@ use rr_result::{RrResult, err_message};
 use utils::check_output;
 
 /// Checks if git has a clean state, a non dirty working directory,
-/// an empty stage area and a non diverging local and remote git repository.
-pub fn check_clean_state() -> RrResult<()> {
+/// an empty stage area and that the remote repository isn't ahead of
+/// the local one.
+pub fn check_state() -> RrResult<()> {
     if try!(has_dirty_working_dir()) {
         return err_message("Can't operate with dirty git working directory! Clear or commit changes!");
     }
@@ -16,9 +17,12 @@ pub fn check_clean_state() -> RrResult<()> {
     }
 
     let local_head = try!(local_head());
+
     try!(remote_update());
     let remote_head = try!(remote_head());
-    if local_head != remote_head {
+
+    let merge_base = try!(merge_base(&local_head, &remote_head));
+    if remote_head != merge_base {
         return err_message("Can't operate with diverging local and remote git repository! Synchronize them!")
     }
 
@@ -73,8 +77,15 @@ pub fn push() -> RrResult<()> {
 
 pub fn log_file(from: &str, to: Option<&str>) -> RrResult<NamedTempFile> {
     let output = try!(log(from, to));
+
+    let prefix = if let Some(to) = to {
+        format!("{}...{}___", from, to)
+    } else {
+        from.to_owned()
+    };
+
     let mut log_file = try!(NamedTempFileOptions::new()
-        .prefix(&format!("{}...{}___", from, to.unwrap_or("")))
+        .prefix(&prefix)
         .create());
 
     try!(log_file.write_all(output.as_bytes()));
@@ -164,3 +175,15 @@ fn commit_hash(refname: &str) -> RrResult<CommitHash> {
     try!(check_output(&output));
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
+
+fn merge_base(refname1: &str, refname2: &str) -> RrResult<CommitHash> {
+    let output = try!(Command::new("git")
+        .arg("merge-base")
+        .arg(refname1)
+        .arg(refname2)
+        .output());
+
+    try!(check_output(&output));
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
