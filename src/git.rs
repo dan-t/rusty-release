@@ -114,12 +114,7 @@ pub fn has_tag(name: &str) -> RrResult<bool> {
         .arg(name)
         .output());
 
-    if output.status.success() {
-        return Ok(true);
-    }
-
-    try!(check_output(&output));
-    Ok(false)
+    Ok(output.status.success())
 }
 
 /// If the working directory has uncommited changes.
