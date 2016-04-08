@@ -39,7 +39,7 @@ impl Display for RrError {
 
 impl From<io::Error> for RrError {
     fn from(err: io::Error) -> RrError {
-        rr_error_message(format!("{}", err))
+        rr_error_message(err.to_string())
     }
 }
 
@@ -53,13 +53,13 @@ impl From<SemVerError> for RrError {
 
 impl From<term::Error> for RrError {
     fn from(err: term::Error) -> RrError {
-        rr_error_message(format!("{}", err))
+        rr_error_message(err.to_string())
     }
 }
 
 impl From<clap::Error> for RrError {
     fn from(err: clap::Error) -> RrError {
-        let msg = format!("{}", err);
+        let msg = err.to_string();
         match err.kind {
             clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed
                 => RrError::ClapDisplaysInfo(msg),
@@ -70,6 +70,6 @@ impl From<clap::Error> for RrError {
 
 impl From<DecodeError> for RrError {
     fn from(err: DecodeError) -> RrError {
-        rr_error_message(format!("{}", err))
+        rr_error_message(err.to_string())
     }
 }

@@ -168,8 +168,8 @@ struct Template<'a>(&'a str);
 
 impl<'a> Template<'a> {
     pub fn render(&self, proj: &CargoProj) -> String {
-        self.0.replace("<PROJ_NAME>", &format!("{}", proj.name()))
-            .replace("<NEW_VERSION>", &format!("{}", proj.version()))
+        self.0.replace("<PROJ_NAME>", &proj.name().to_string())
+            .replace("<NEW_VERSION>", &proj.version().to_string())
     }
 }
 
