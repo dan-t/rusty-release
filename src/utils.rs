@@ -46,3 +46,51 @@ pub fn map_file<R, F>(file: &Path, f: F) -> RrResult<R>
     let r = try!(f(contents));
     Ok(r)
 }
+
+macro_rules! stdoutln {
+    ($fmt:expr) => {{
+        use term;
+
+        let mut stdout = term::stdout().unwrap();
+        stdout.fg(term::color::GREEN).unwrap();
+
+        writeln!(stdout, $fmt).unwrap();
+
+        stdout.reset().unwrap();
+    }};
+
+    ($fmt:expr, $($arg:tt)*) => {{
+        use term;
+
+        let mut stdout = term::stdout().unwrap();
+        stdout.fg(term::color::GREEN).unwrap();
+
+        writeln!(stdout, $fmt, $($arg)*).unwrap();
+
+        stdout.reset().unwrap();
+    }};
+}
+
+macro_rules! stderrln {
+    ($fmt:expr) => {{
+        use term;
+
+        let mut stderr = term::stderr().unwrap();
+        stderr.fg(term::color::RED).unwrap();
+
+        writeln!(stderr, $fmt).unwrap();
+
+        stderr.reset().unwrap();
+    }};
+
+    ($fmt:expr, $($arg:tt)*) => {{
+        use term;
+
+        let mut stderr = term::stderr().unwrap();
+        stderr.fg(term::color::RED).unwrap();
+
+        writeln!(stderr, $fmt, $($arg)*).unwrap();
+
+        stderr.reset().unwrap();
+    }};
+}

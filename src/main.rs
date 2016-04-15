@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate clap;
+
 extern crate toml;
 extern crate semver;
 extern crate term;
@@ -21,6 +22,8 @@ mod version_kind;
 mod config;
 mod cargo_proj;
 mod cargo;
+
+#[macro_use]
 mod utils;
 
 fn main() {
@@ -28,23 +31,15 @@ fn main() {
     execute().unwrap_or_else(|err| {
         match err {
             RrError::Message(_) => {
-                let mut stderr = term::stderr().unwrap();
-                stderr.fg(term::color::RED).unwrap();
-
-                writeln!(stderr, "{}", err).unwrap();
+                stderrln!("{}", err);
+                exit_code = 1;
             }
 
-            RrError::ClapDisplaysInfo(_) => {}
+            RrError::ClapDisplaysInfo(_) => {
+                exit_code = 2;
+            }
         }
-
-        exit_code = 1;
     });
-
-    let mut stdout = term::stdout().unwrap();
-    stdout.reset().unwrap();
-
-    let mut stderr = term::stderr().unwrap();
-    stderr.reset().unwrap();
 
     std::process::exit(exit_code);
 }
@@ -54,13 +49,10 @@ fn execute() -> RrResult<()> {
     let mut cargo_proj = try!(CargoProj::find(&config.start_dir));
     try!(std::env::set_current_dir(try!(cargo_proj.root_dir())));
 
-    let mut stdout = term::stdout().unwrap();
-    try!(stdout.fg(term::color::GREEN));
-
-    try!(writeln!(stdout, "Checking git state ..."));
+    stdoutln!("Checking git state ...");
     try!(git::check_state());
 
-    try!(writeln!(stdout, "Testing ..."));
+    stdoutln!("Testing ...");
     try!(cargo::test());
 
     let curr_version = cargo_proj.version().clone();
@@ -69,26 +61,26 @@ fn execute() -> RrResult<()> {
     let new_version = config.version_kind.increment(&curr_version);
     try!(cargo_proj.write_version(&new_version));
 
-    try!(writeln!(stdout, "Building release ..."));
+    stdoutln!("Building release ...");
     try!(cargo::build_release());
 
     if let Some(changelog) = cargo_proj.changelog() {
-        try!(writeln!(stdout, "Updating changelog ..."));
+        stdoutln!("Updating changelog ...");
         try!(update_changelog(config.editor(), changelog, &tag_name_curr_version, &new_version));
     }
 
-    try!(writeln!(stdout, "Creating git commit ..."));
+    stdoutln!("Creating git commit ...");
     try!(git::add_update());
     try!(git::commit(&config.commit_message(&cargo_proj)));
     try!(git::tag(&config.tag_name(&cargo_proj)));
 
     if config.git_push {
-        try!(writeln!(stdout, "Pushing git changes ..."));
+        stdoutln!("Pushing git changes ...");
         try!(git::push());
     }
 
     if config.cargo_publish {
-        try!(writeln!(stdout, "Publishing to crates.io ..."));
+        stdoutln!("Publishing to crates.io ...");
         try!(cargo::publish());
     }
 
