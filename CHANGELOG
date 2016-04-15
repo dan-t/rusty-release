@@ -1,3 +1,7 @@
+0.3.3
+-----
+* Minor internal simplifications
+
 0.3.2
 -----
 * Allow local HEAD to be ahead of remote HEAD
