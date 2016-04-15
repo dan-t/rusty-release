@@ -167,7 +167,7 @@ impl Config {
 struct Template<'a>(&'a str);
 
 impl<'a> Template<'a> {
-    pub fn render(&self, proj: &CargoProj) -> String {
+    fn render(&self, proj: &CargoProj) -> String {
         self.0.replace("<PROJ_NAME>", &proj.name().to_string())
             .replace("<NEW_VERSION>", &proj.version().to_string())
     }
@@ -176,11 +176,11 @@ impl<'a> Template<'a> {
 /// Represents the data from a `.rusty-release.toml` configuration file.
 #[derive(RustcDecodable, Debug, Default)]
 struct ConfigFromFile {
-    pub cargo_publish: Option<bool>,
-    pub git_push: Option<bool>,
-    pub commit_message: Option<String>,
-    pub tag_name: Option<String>,
-    pub editor: Option<String>
+    cargo_publish: Option<bool>,
+    git_push: Option<bool>,
+    commit_message: Option<String>,
+    tag_name: Option<String>,
+    editor: Option<String>
 }
 
 impl ConfigFromFile {
