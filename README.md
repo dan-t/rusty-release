@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/dan-t/rusty-release.svg?branch=master)](https://travis-ci.org/dan-t/rusty-release)
+[![](http://meritbadge.herokuapp.com/rusty-release)](https://crates.io/crates/rusty-release)
 
 rusty-release
 =============
