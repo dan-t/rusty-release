@@ -69,7 +69,7 @@ fn execute() -> RrResult<()> {
         try!(update_changelog(config.editor(), changelog, &tag_name_curr_version, &new_version));
     }
 
-    stdoutln!("Creating git commit ...");
+    stdoutln!("Creating git commit/tag ...");
     try!(git::add_update());
     try!(git::commit(&config.commit_message(&cargo_proj)));
     try!(git::tag(&config.tag_name(&cargo_proj)));
