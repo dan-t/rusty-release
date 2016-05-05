@@ -138,7 +138,15 @@ impl Config {
            git_push: true,
            commit_message: "<PROJ_NAME> <NEW_VERSION>".to_string(),
            tag_name: "<PROJ_NAME>-<NEW_VERSION>".to_string(),
-           editor: "gvim -o".to_string()
+           editor: {
+               if let Ok(editor) = env::var("EDITOR") {
+                   editor
+               } else if let Ok(visual) = env::var("VISUAL") {
+                   visual
+               } else {
+                   "gvim -o".to_string()
+               }
+           }
        })
    }
 
