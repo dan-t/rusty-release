@@ -77,5 +77,7 @@ The current supported configuration (default configuration displayed) is:
     tag_name = "<PROJ_NAME>-<NEW_VERSION>"
 
     # the editor command for opening the changelog, for the best experience the
-    # editor command should be able to open multiple files in a split view
+    # editor command should be able to open multiple files in a split view,
+    # first the environment variables $EDITOR and $VISUAL are checked and if
+    # they aren't available then "gvim -o" is used
     editor = "gvim -o"
