@@ -1,3 +1,7 @@
+0.3.4
+-----
+* Support $EDITOR and $VISUAL as editor commands
+
 0.3.3
 -----
 * Minor internal simplifications
