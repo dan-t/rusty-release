@@ -69,9 +69,13 @@ fn execute() -> RrResult<()> {
         try!(update_changelog(config.editor(), changelog, &tag_name_curr_version, &new_version));
     }
 
-    stdoutln!("Creating git commit/tag ...");
-    try!(git::add_update());
-    try!(git::commit(&config.commit_message(&cargo_proj)));
+    if try!(git::has_dirty_working_dir()) {
+        stdoutln!("Creating git commit ...");
+        try!(git::add_update());
+        try!(git::commit(&config.commit_message(&cargo_proj)));
+    }
+
+    stdoutln!("Creating git tag ...");
     try!(git::tag(&config.tag_name(&cargo_proj)));
 
     if config.git_push {

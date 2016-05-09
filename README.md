@@ -28,8 +28,13 @@ The build binary will be located at `~/.cargo/bin/rusty-release`.
 Usage
 =====
 
-Calling `rusty-release <VERSION>` - where `<VERSION>` has to be either `major`, `minor` or `patch` -
-inside of the cargo project should start the release process:
+`rusty-release` has to be called with a version (`rusty-release <VERSION>`), where
+`<VERSION>` has to be either `major`, `minor`, `patch` or `current`. `major/minor/patch`
+increment the appropriate part of the current version number and `current` makes a
+release with the current version number. So `current` is most likely useful for the first,
+initial release.
+
+The release process:
 
 * Checks if the git working tree isn't dirty, that there's nothing staged and that
   the local and the remote git repositories are synchronized.

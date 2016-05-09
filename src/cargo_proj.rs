@@ -64,12 +64,15 @@ impl CargoProj {
 
     /// Write the new `version` into the `Cargo.toml`.
     pub fn write_version(&mut self, version: &Version) -> RrResult<()> {
-        try!(modify_file(&self.cargo_toml, |contents| {
-            contents.replace(&format!("version = \"{}\"", self.version),
-                             &format!("version = \"{}\"", version))
-        }));
+        if *version != self.version {
+            try!(modify_file(&self.cargo_toml, |contents| {
+                contents.replace(&format!("version = \"{}\"", self.version),
+                                 &format!("version = \"{}\"", version))
+            }));
 
-        self.version = version.clone();
+            self.version = version.clone();
+        }
+
         Ok(())
     }
 

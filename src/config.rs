@@ -54,7 +54,7 @@ impl Config {
            .about("Make a release for a cargo project")
            .version(crate_version!())
            .author("Daniel Trstenjak <daniel.trstenjak@gmail.com>")
-           .arg_from_usage("<VERSION_KIND> 'Which version number gets increased (major, minor or patch)'")
+           .arg_from_usage("<VERSION_KIND> 'Which version number gets increased (major, minor, patch or current)'")
            .arg(Arg::with_name("start-dir")
                 .short("s")
                 .long("start-dir")

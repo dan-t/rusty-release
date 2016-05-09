@@ -118,7 +118,7 @@ pub fn has_tag(name: &str) -> RrResult<bool> {
 }
 
 /// If the working directory has uncommited changes.
-fn has_dirty_working_dir() -> RrResult<bool> {
+pub fn has_dirty_working_dir() -> RrResult<bool> {
     let output = try!(Command::new("git")
         .arg("diff-files")
         .arg("--quiet")
