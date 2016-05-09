@@ -9,7 +9,12 @@ pub fn check_output(out: &Output) -> RrResult<()> {
         return Ok(());
     }
 
-    err_message(String::from_utf8_lossy(&out.stderr).into_owned())
+    let mut msg = String::from_utf8_lossy(&out.stderr).into_owned();
+    if msg.is_empty() {
+        msg = String::from_utf8_lossy(&out.stdout).into_owned();
+    }
+
+    err_message(msg)
 }
 
 /// Reads `file` into a string which is passed to the function `f`
