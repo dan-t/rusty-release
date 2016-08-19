@@ -8,9 +8,9 @@ repository = "https://github.com/dan-t/rusty-release"
 readme = "README.md"
 
 [dependencies]
-clap = "~2.2.4"
+clap = "~2.2.6"
 term = "~0.4.4"
-tempfile = "~2.1.1"
-toml = "~0.1.28"
+tempfile = "~2.1.4"
+toml = "~0.1.30"
 semver = "~0.2.3"
-rustc-serialize = "0.3.18"
+rustc-serialize = "~0.3.19"
