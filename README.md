@@ -86,3 +86,4 @@ The current supported configuration (default configuration displayed) is:
     # first the environment variables $EDITOR and $VISUAL are checked and if
     # they aren't available then "gvim -o" is used
     editor = "gvim -o"
+
