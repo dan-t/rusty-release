@@ -1,3 +1,8 @@
+0.3.7
+-----
+* Cleanup error handling
+* Lock file changes for rustc 1.13
+
 0.3.6
 -----
 * Update dependencies

@@ -1,6 +1,6 @@
 [package]
 name = "rusty-release"
-version = "0.3.6"
+version = "0.3.7"
 authors = ["Daniel Trstenjak <daniel.trstenjak@gmail.com>"]
 license = "BSD-3-Clause"
 description = "Make a release of a cargo project"
