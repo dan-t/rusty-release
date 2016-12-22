@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::ffi::OsStr;
 use toml;
 use semver::Version;
-use rr_result::{RrResult, err_message, rr_error_message};
+use rr_result::RrResult;
 use utils::{modify_file, map_file};
 
 #[derive(Debug)]
@@ -32,12 +32,12 @@ impl CargoProj {
 
         let name = try!(toml.lookup("package.name")
             .and_then(toml::Value::as_str)
-            .ok_or_else(|| rr_error_message(format!("Couldn't get 'package.name' string from: {:?}", toml))));
+            .ok_or(format!("Couldn't get 'package.name' string from: {:?}", toml)));
 
         let version = {
             let version_str = try!(toml.lookup("package.version")
                 .and_then(toml::Value::as_str)
-                .ok_or_else(|| rr_error_message(format!("Couldn't get 'package.version' string from: {:?}", toml))));
+                .ok_or(format!("Couldn't get 'package.version' string from: {:?}", toml)));
 
             try!(Version::parse(version_str))
         };
@@ -79,7 +79,7 @@ impl CargoProj {
     /// The root directory of the cargo project.
     pub fn root_dir(&self) -> RrResult<&Path> {
         self.cargo_toml.parent()
-            .ok_or_else(|| rr_error_message(format!("Couldn't get directory of path: {:?}", self.cargo_toml)))
+            .ok_or(format!("Couldn't get directory of path: {:?}", self.cargo_toml).into())
     }
 
     pub fn changelog(&self) -> Option<&Path> {
@@ -122,7 +122,7 @@ fn find_cargo_toml_dir(start_dir: &Path) -> RrResult<PathBuf> {
         }
 
         if ! dir.pop() {
-            return err_message(format!("Couldn't find 'Cargo.toml' starting at directory '{}'!", start_dir.display()));
+            return Err(format!("Couldn't find 'Cargo.toml' starting at directory '{}'!", start_dir.display()).into());
         }
     }
 }
@@ -145,6 +145,6 @@ fn parse_toml(path: &Path) -> RrResult<toml::Value> {
         let mut parser = toml::Parser::new(&contents);
         parser.parse()
             .map(toml::Value::Table)
-            .ok_or_else(|| rr_error_message(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors)))
+            .ok_or(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors).into())
     })
 }

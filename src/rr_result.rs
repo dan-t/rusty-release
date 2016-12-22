@@ -20,14 +20,6 @@ pub enum RrError {
     ClapDisplaysInfo(String)
 }
 
-pub fn err_message<M: Into<String>, T>(msg: M) -> RrResult<T> {
-    Err(rr_error_message(msg))
-}
-
-pub fn rr_error_message<M: Into<String>>(msg: M) -> RrError {
-    RrError::Message(msg.into())
-}
-
 impl Display for RrError {
     fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
         match *self {
@@ -39,21 +31,21 @@ impl Display for RrError {
 
 impl From<io::Error> for RrError {
     fn from(err: io::Error) -> RrError {
-        rr_error_message(err.to_string())
+        RrError::Message(err.to_string())
     }
 }
 
 impl From<SemVerError> for RrError {
     fn from(err: SemVerError) -> RrError {
         match err {
-            SemVerError::ParseError(err) => rr_error_message(err)
+            SemVerError::ParseError(err) => RrError::Message(err)
         }
     }
 }
 
 impl From<term::Error> for RrError {
     fn from(err: term::Error) -> RrError {
-        rr_error_message(err.to_string())
+        RrError::Message(err.to_string())
     }
 }
 
@@ -70,6 +62,18 @@ impl From<clap::Error> for RrError {
 
 impl From<DecodeError> for RrError {
     fn from(err: DecodeError) -> RrError {
-        rr_error_message(err.to_string())
+        RrError::Message(err.to_string())
+    }
+}
+
+impl From<String> for RrError {
+    fn from(s: String) -> RrError {
+        RrError::Message(s)
+    }
+}
+
+impl<'a> From<&'a str> for RrError {
+    fn from(s: &str) -> RrError {
+        RrError::Message(s.to_owned())
     }
 }

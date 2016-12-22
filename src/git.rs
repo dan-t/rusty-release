@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::process::Command;
 use tempfile::{NamedTempFile, NamedTempFileOptions};
-use rr_result::{RrResult, err_message};
+use rr_result::RrResult;
 use utils::check_output;
 
 /// Checks if git has a clean state, a non dirty working directory,
@@ -9,11 +9,11 @@ use utils::check_output;
 /// the local one.
 pub fn check_state() -> RrResult<()> {
     if try!(has_dirty_working_dir()) {
-        return err_message("Can't operate with dirty git working directory! Clear or commit changes!");
+        return Err("Can't operate with dirty git working directory! Clear or commit changes!".into());
     }
 
     if try!(has_staged_changes()) {
-        return err_message("Can't operate with non empty git staging area! Clear or commit staged changes!");
+        return Err("Can't operate with non empty git staging area! Clear or commit staged changes!".into());
     }
 
     let local_head = try!(local_head());
@@ -23,7 +23,7 @@ pub fn check_state() -> RrResult<()> {
 
     let merge_base = try!(merge_base(&local_head, &remote_head));
     if remote_head != merge_base {
-        return err_message("Can't operate with diverging local and remote git repository! Synchronize them!")
+        return Err("Can't operate with diverging local and remote git repository! Synchronize them!".into())
     }
 
     Ok(())

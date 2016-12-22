@@ -2,7 +2,7 @@ use std::process::Output;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write, Seek, SeekFrom};
 use std::path::Path;
-use rr_result::{RrResult, err_message};
+use rr_result::RrResult;
 
 pub fn check_output(out: &Output) -> RrResult<()> {
     if out.status.success() {
@@ -14,7 +14,7 @@ pub fn check_output(out: &Output) -> RrResult<()> {
         msg = String::from_utf8_lossy(&out.stdout).into_owned();
     }
 
-    err_message(msg)
+    Err(msg.into())
 }
 
 /// Reads `file` into a string which is passed to the function `f`

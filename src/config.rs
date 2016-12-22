@@ -4,7 +4,7 @@ use std::process::Command;
 use clap::{App, Arg};
 use toml;
 use rustc_serialize::Decodable;
-use rr_result::{RrResult, err_message, rr_error_message};
+use rr_result::RrResult;
 use version_kind::VersionKind;
 use utils::map_file;
 use cargo_proj::CargoProj;
@@ -70,7 +70,7 @@ impl Config {
            .unwrap_or(try!(env::current_dir()));
 
        if ! start_dir.is_dir() {
-           return err_message(format!("Invalid directory given to '--start-dir': '{}'!", start_dir.display()));
+           return Err(format!("Invalid directory given to '--start-dir': '{}'!", start_dir.display()).into());
        }
 
        let mut config = try!(Config::from_file());
@@ -152,15 +152,15 @@ impl Config {
 
    fn check(&self) -> RrResult<()> {
        if self.commit_message.is_empty() {
-           return err_message("Invalid, empty commit message!");
+           return Err("Invalid, empty commit message!".into());
        }
 
        if self.tag_name.is_empty() {
-           return err_message("Invalid empty tag name!");
+           return Err("Invalid empty tag name!".into());
        }
 
        if self.editor.is_empty() {
-           return err_message("Invalid, empty editor command!");
+           return Err("Invalid, empty editor command!".into());
        }
 
        Ok(())
@@ -215,8 +215,7 @@ impl ConfigFromFile {
         map_file(path, |contents| {
             let mut parser = toml::Parser::new(&contents);
             let value = try!(parser.parse()
-                .ok_or_else(|| rr_error_message(format!("Couldn't parse toml file '{}': {:?}",
-                                                        path.display(), parser.errors))));
+                .ok_or(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors)));
 
             let mut decoder = toml::Decoder::new(toml::Value::Table(value));
             Ok(try!(ConfigFromFile::decode(&mut decoder)))
