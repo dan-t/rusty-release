@@ -137,7 +137,7 @@ impl Config {
            cargo_publish: true,
            git_push: true,
            commit_message: "<PROJ_NAME> <NEW_VERSION>".to_string(),
-           tag_name: "<PROJ_NAME>-<NEW_VERSION>".to_string(),
+           tag_name: "v<NEW_VERSION>".to_string(),
            editor: {
                if let Ok(editor) = env::var("EDITOR") {
                    editor

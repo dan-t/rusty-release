@@ -79,7 +79,7 @@ The current supported configuration (default configuration displayed) is:
     commit_message = "<PROJ_NAME> <NEW_VERSION>"
 
     # a string template like 'commit_message' supporting the same placeholders
-    tag_name = "<PROJ_NAME>-<NEW_VERSION>"
+    tag_name = "v<NEW_VERSION>"
 
     # the editor command for opening the changelog, for the best experience the
     # editor command should be able to open multiple files in a split view,
