@@ -21,7 +21,9 @@ new version number at the top of the Changelog and open it.
 Installation
 ============
 
-    $ cargo install rusty-release
+```sh
+$ cargo install rusty-release
+```
 
 The build binary will be located at `~/.cargo/bin/rusty-release`.
 
@@ -67,23 +69,24 @@ and from the cargo project root directory (where the `Cargo.toml` resides).
 
 The current supported configuration (default configuration displayed) is:
 
-    # publish to crates.io
-    cargo_publish = true
+```toml
+# publish to crates.io
+cargo_publish = true
 
-    # push to git remote repository
-    git_push = true
+# push to git remote repository
+git_push = true
 
-    # string template for the creation of the commit message, currently the two
-    # placeholders '<PROJ_NAME>' - the name of the cargo project - and
-    # '<NEW_VERSION>' - the version of the release - are supported
-    commit_message = "<PROJ_NAME> <NEW_VERSION>"
+# string template for the creation of the commit message, currently the two
+# placeholders '<PROJ_NAME>' - the name of the cargo project - and
+# '<NEW_VERSION>' - the version of the release - are supported
+commit_message = "<PROJ_NAME> <NEW_VERSION>"
 
-    # a string template like 'commit_message' supporting the same placeholders
-    tag_name = "v<NEW_VERSION>"
+# a string template like 'commit_message' supporting the same placeholders
+tag_name = "v<NEW_VERSION>"
 
-    # the editor command for opening the changelog, for the best experience the
-    # editor command should be able to open multiple files in a split view,
-    # first the environment variables $EDITOR and $VISUAL are checked and if
-    # they aren't available then "gvim -o" is used
-    editor = "gvim -o"
-
+# the editor command for opening the changelog, for the best experience the
+# editor command should be able to open multiple files in a split view,
+# first the environment variables $EDITOR and $VISUAL are checked and if
+# they aren't available then "gvim -o" is used
+editor = "gvim -o"
+```
