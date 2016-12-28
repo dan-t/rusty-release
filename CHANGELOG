@@ -1,3 +1,7 @@
+0.4.0
+-----
+* Change the default tag template from "<PROJ_NAME>-<NEW_VERSION>" to the more commonly used one "v<NEW_VERSION>"
+
 0.3.7
 -----
 * Cleanup error handling
