@@ -3,29 +3,29 @@ use rr_result::RrResult;
 use utils::check_output;
 
 pub fn build_release() -> RrResult<()> {
-    let output = try!(Command::new("cargo")
+    let output = Command::new("cargo")
         .arg("build")
         .arg("--release")
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }
 
 pub fn test() -> RrResult<()> {
-    let output = try!(Command::new("cargo")
+    let output = Command::new("cargo")
         .arg("test")
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }
 
 pub fn publish() -> RrResult<()> {
-    let output = try!(Command::new("cargo")
+    let output = Command::new("cargo")
         .arg("publish")
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }

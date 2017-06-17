@@ -8,20 +8,20 @@ use utils::check_output;
 /// an empty stage area and that the remote repository isn't ahead of
 /// the local one.
 pub fn check_state() -> RrResult<()> {
-    if try!(has_dirty_working_dir()) {
+    if has_dirty_working_dir()? {
         return Err("Can't operate with dirty git working directory! Clear or commit changes!".into());
     }
 
-    if try!(has_staged_changes()) {
+    if has_staged_changes()? {
         return Err("Can't operate with non empty git staging area! Clear or commit staged changes!".into());
     }
 
-    let local_head = try!(local_head());
+    let local_head = local_head()?;
 
-    try!(remote_update());
-    let remote_head = try!(remote_head());
+    remote_update()?;
+    let remote_head = remote_head()?;
 
-    let merge_base = try!(merge_base(&local_head, &remote_head));
+    let merge_base = merge_base(&local_head, &remote_head)?;
     if remote_head != merge_base {
         return Err("Can't operate with diverging local and remote git repository! Synchronize them!".into())
     }
@@ -30,53 +30,53 @@ pub fn check_state() -> RrResult<()> {
 }
 
 pub fn add_update() -> RrResult<()> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("add")
         .arg("--update")
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }
 
 pub fn commit(msg: &str) -> RrResult<()> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("commit")
         .arg(format!("--message={}", msg))
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }
 
 pub fn tag(name: &str) -> RrResult<()> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("tag")
         .arg(name)
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }
 
 pub fn push() -> RrResult<()> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("push")
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
 
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("push")
         .arg("--tags")
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }
 
 pub fn log_file(from: &str, to: Option<&str>) -> RrResult<NamedTempFile> {
-    let output = try!(log(from, to));
+    let output = log(from, to)?;
 
     let prefix = if let Some(to) = to {
         format!("{}...{}___", from, to)
@@ -84,70 +84,70 @@ pub fn log_file(from: &str, to: Option<&str>) -> RrResult<NamedTempFile> {
         from.to_owned()
     };
 
-    let mut log_file = try!(NamedTempFileOptions::new()
+    let mut log_file = NamedTempFileOptions::new()
         .prefix(&prefix)
-        .create());
+        .create()?;
 
-    try!(log_file.write_all(output.as_bytes()));
+    log_file.write_all(output.as_bytes())?;
     Ok(log_file)
 }
 
 pub fn log(from: &str, to: Option<&str>) -> RrResult<String> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("--no-pager")
         .arg("log")
         .arg("--decorate=short")
         .arg("--pretty=oneline")
         .arg("--abbrev-commit")
         .arg(if let Some(to) = to { format!("{}...{}", from, to) } else { from.to_owned() })
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
 pub fn has_tag(name: &str) -> RrResult<bool> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("rev-parse")
         .arg("--verify")
         .arg("--quiet")
         .arg(name)
-        .output());
+        .output()?;
 
     Ok(output.status.success())
 }
 
 /// If the working directory has uncommited changes.
 pub fn has_dirty_working_dir() -> RrResult<bool> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("diff-files")
         .arg("--quiet")
         .arg("--exit-code")
-        .output());
+        .output()?;
 
     Ok(output.status.code() == Some(1))
 }
 
 /// If the stage area contains uncommited changes.
 fn has_staged_changes() -> RrResult<bool> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("diff-index")
         .arg("--quiet")
         .arg("--exit-code")
         .arg("--cached HEAD")
-        .output());
+        .output()?;
 
     Ok(output.status.code() == Some(1))
 }
 
 /// Update the local refs to the remote repository.
 fn remote_update() -> RrResult<()> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("remote")
         .arg("update")
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }
 
@@ -162,23 +162,23 @@ fn remote_head() -> RrResult<CommitHash> {
 }
 
 fn commit_hash(refname: &str) -> RrResult<CommitHash> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("rev-parse")
         .arg(refname)
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
 fn merge_base(refname1: &str, refname2: &str) -> RrResult<CommitHash> {
-    let output = try!(Command::new("git")
+    let output = Command::new("git")
         .arg("merge-base")
         .arg(refname1)
         .arg(refname2)
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 

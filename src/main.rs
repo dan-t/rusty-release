@@ -45,47 +45,47 @@ fn main() {
 }
 
 fn execute() -> RrResult<()> {
-    let config = try!(Config::from_file_and_command_args());
-    let mut cargo_proj = try!(CargoProj::find(&config.start_dir));
-    try!(std::env::set_current_dir(try!(cargo_proj.root_dir())));
+    let config = Config::from_file_and_command_args()?;
+    let mut cargo_proj = CargoProj::find(&config.start_dir)?;
+    std::env::set_current_dir(cargo_proj.root_dir()?)?;
 
     stdoutln!("Checking git state ...");
-    try!(git::check_state());
+    git::check_state()?;
 
     stdoutln!("Testing ...");
-    try!(cargo::test());
+    cargo::test()?;
 
     let curr_version = cargo_proj.version().clone();
     let tag_name_curr_version = config.tag_name(&cargo_proj);
 
     let new_version = config.version_kind.increment(&curr_version);
-    try!(cargo_proj.write_version(&new_version));
+    cargo_proj.write_version(&new_version)?;
 
     stdoutln!("Building release ...");
-    try!(cargo::build_release());
+    cargo::build_release()?;
 
     if let Some(changelog) = cargo_proj.changelog() {
         stdoutln!("Updating changelog ...");
-        try!(update_changelog(config.editor(), changelog, &tag_name_curr_version, &new_version));
+        update_changelog(config.editor(), changelog, &tag_name_curr_version, &new_version)?;
     }
 
-    if try!(git::has_dirty_working_dir()) {
+    if git::has_dirty_working_dir()? {
         stdoutln!("Creating git commit ...");
-        try!(git::add_update());
-        try!(git::commit(&config.commit_message(&cargo_proj)));
+        git::add_update()?;
+        git::commit(&config.commit_message(&cargo_proj))?;
     }
 
     stdoutln!("Creating git tag ...");
-    try!(git::tag(&config.tag_name(&cargo_proj)));
+    git::tag(&config.tag_name(&cargo_proj))?;
 
     if config.git_push {
         stdoutln!("Pushing git changes ...");
-        try!(git::push());
+        git::push()?;
     }
 
     if config.cargo_publish {
         stdoutln!("Publishing to crates.io ...");
-        try!(cargo::publish());
+        cargo::publish()?;
     }
 
     Ok(())
@@ -99,20 +99,20 @@ fn update_changelog(mut editor_cmd: Command,
                     tag_name_curr_version: &str,
                     new_version: &Version)
                     -> RrResult<()> {
-    try!(modify_file(changelog, |contents| { format!("{}\n\n{}", new_version, contents) }));
+    modify_file(changelog, |contents| { format!("{}\n\n{}", new_version, contents) })?;
 
-    let log_to = if try!(git::has_tag(tag_name_curr_version)) {
+    let log_to = if git::has_tag(tag_name_curr_version)? {
         Some(tag_name_curr_version)
     } else {
         None
     };
 
-    let log_file = try!(git::log_file("HEAD", log_to));
+    let log_file = git::log_file("HEAD", log_to)?;
 
-    let output = try!(editor_cmd.arg(changelog)
+    let output = editor_cmd.arg(changelog)
         .arg(log_file.path())
-        .output());
+        .output()?;
 
-    try!(check_output(&output));
+    check_output(&output)?;
     Ok(())
 }

@@ -25,24 +25,24 @@ impl CargoProj {
     /// Searches for the root directory (containing a `Cargo.toml`) of the cargo project starting
     /// at `start_dir` and continuing the search upwards the directory tree until it's found.
     pub fn find(start_dir: &Path) -> RrResult<CargoProj> {
-        let cargo_dir = try!(find_cargo_toml_dir(start_dir));
+        let cargo_dir = find_cargo_toml_dir(start_dir)?;
 
         let cargo_toml = cargo_dir.join("Cargo.toml");
-        let toml = try!(parse_toml(&cargo_toml));
+        let toml = parse_toml(&cargo_toml)?;
 
-        let name = try!(toml.lookup("package.name")
+        let name = toml.lookup("package.name")
             .and_then(toml::Value::as_str)
-            .ok_or(format!("Couldn't get 'package.name' string from: {:?}", toml)));
+            .ok_or(format!("Couldn't get 'package.name' string from: {:?}", toml))?;
 
         let version = {
-            let version_str = try!(toml.lookup("package.version")
+            let version_str = toml.lookup("package.version")
                 .and_then(toml::Value::as_str)
-                .ok_or(format!("Couldn't get 'package.version' string from: {:?}", toml)));
+                .ok_or(format!("Couldn't get 'package.version' string from: {:?}", toml))?;
 
-            try!(Version::parse(version_str))
+            Version::parse(version_str)?
         };
 
-        let changelog = try!(find_changelog(&cargo_dir));
+        let changelog = find_changelog(&cargo_dir)?;
 
         Ok(CargoProj {
             name: name.to_string(),
@@ -65,10 +65,10 @@ impl CargoProj {
     /// Write the new `version` into the `Cargo.toml`.
     pub fn write_version(&mut self, version: &Version) -> RrResult<()> {
         if *version != self.version {
-            try!(modify_file(&self.cargo_toml, |contents| {
+            modify_file(&self.cargo_toml, |contents| {
                 contents.replace(&format!("version = \"{}\"", self.version),
                                  &format!("version = \"{}\"", version))
-            }));
+            })?;
 
             self.version = version.clone();
         }
@@ -95,7 +95,7 @@ impl CargoProj {
 macro_rules! read_files {
     ($dir:expr) => (
         {
-            let dir_entries = try!(fs::read_dir($dir));
+            let dir_entries = fs::read_dir($dir)?;
 
             let files = dir_entries.filter_map(|f| {
                 match f {

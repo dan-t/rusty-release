@@ -22,19 +22,19 @@ pub fn check_output(out: &Output) -> RrResult<()> {
 pub fn modify_file<F>(file: &Path, f: F) -> RrResult<()>
     where F: FnOnce(String) -> String
 {
-    let mut file = try!(OpenOptions::new()
+    let mut file = OpenOptions::new()
         .read(true)
         .write(true)
-        .open(file));
+        .open(file)?;
 
     let mut contents = String::new();
-    try!(file.read_to_string(&mut contents));
+    file.read_to_string(&mut contents)?;
 
     let contents = f(contents);
 
-    try!(file.set_len(contents.as_bytes().len() as u64));
-    try!(file.seek(SeekFrom::Start(0)));
-    try!(file.write_all(contents.as_bytes()));
+    file.set_len(contents.as_bytes().len() as u64)?;
+    file.seek(SeekFrom::Start(0))?;
+    file.write_all(contents.as_bytes())?;
     Ok(())
 }
 
@@ -43,12 +43,12 @@ pub fn modify_file<F>(file: &Path, f: F) -> RrResult<()>
 pub fn map_file<R, F>(file: &Path, f: F) -> RrResult<R>
     where F: FnOnce(String) -> RrResult<R>
 {
-    let mut file = try!(File::open(file));
+    let mut file = File::open(file)?;
 
     let mut contents = String::new();
-    try!(file.read_to_string(&mut contents));
+    file.read_to_string(&mut contents)?;
 
-    let r = try!(f(contents));
+    let r = f(contents)?;
     Ok(r)
 }
 
