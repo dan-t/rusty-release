@@ -30,14 +30,18 @@ impl CargoProj {
         let cargo_toml = cargo_dir.join("Cargo.toml");
         let toml = parse_toml(&cargo_toml)?;
 
-        let name = toml.lookup("package.name")
+        let package = toml.as_table()
+            .and_then(|t| t.get("package"))
+            .ok_or(format!("Couldn't get 'package' table from: {:?}", toml))?;
+
+        let name = package.get("name")
             .and_then(toml::Value::as_str)
-            .ok_or(format!("Couldn't get 'package.name' string from: {:?}", toml))?;
+            .ok_or(format!("Couldn't get 'name' string from: {:?}", package))?;
 
         let version = {
-            let version_str = toml.lookup("package.version")
+            let version_str = package.get("version")
                 .and_then(toml::Value::as_str)
-                .ok_or(format!("Couldn't get 'package.version' string from: {:?}", toml))?;
+                .ok_or(format!("Couldn't get 'version' string from: {:?}", package))?;
 
             Version::parse(version_str)?
         };
@@ -142,9 +146,7 @@ fn find_changelog(dir: &Path) -> RrResult<Option<PathBuf>> {
 
 fn parse_toml(path: &Path) -> RrResult<toml::Value> {
     map_file(path, |contents| {
-        let mut parser = toml::Parser::new(&contents);
-        parser.parse()
-            .map(toml::Value::Table)
-            .ok_or(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors).into())
+        let val = contents.parse::<toml::Value>()?;
+        Ok(val)
     })
 }

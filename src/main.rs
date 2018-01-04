@@ -1,11 +1,14 @@
 #[macro_use]
 extern crate clap;
 
+#[macro_use]
+extern crate serde_derive;
+
+extern crate serde;
 extern crate toml;
 extern crate semver;
 extern crate term;
 extern crate tempfile;
-extern crate rustc_serialize;
 
 use std::io::Write;
 use std::path::Path;

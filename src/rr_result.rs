@@ -2,9 +2,9 @@ use std::io;
 use std::convert::From;
 use std::fmt::{self, Display, Formatter};
 use semver::SemVerError;
-use toml::DecodeError;
 use clap;
 use term;
+use toml;
 
 /// The result type used in `rusty-release`.
 pub type RrResult<T> = Result<T, RrError>;
@@ -49,6 +49,12 @@ impl From<term::Error> for RrError {
     }
 }
 
+impl From<toml::de::Error> for RrError {
+    fn from(err: toml::de::Error) -> RrError {
+        RrError::Message(err.to_string())
+    }
+}
+
 impl From<clap::Error> for RrError {
     fn from(err: clap::Error) -> RrError {
         let msg = err.to_string();
@@ -57,12 +63,6 @@ impl From<clap::Error> for RrError {
                 => RrError::ClapDisplaysInfo(msg),
             _   => RrError::Message(msg)
         }
-    }
-}
-
-impl From<DecodeError> for RrError {
-    fn from(err: DecodeError) -> RrError {
-        RrError::Message(err.to_string())
     }
 }
 

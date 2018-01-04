@@ -3,7 +3,6 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use clap::{App, Arg};
 use toml;
-use rustc_serialize::Decodable;
 use rr_result::RrResult;
 use version_kind::VersionKind;
 use utils::map_file;
@@ -182,7 +181,7 @@ impl<'a> Template<'a> {
 }
 
 /// Represents the data from a `.rusty-release.toml` configuration file.
-#[derive(RustcDecodable, Debug, Default)]
+#[derive(Deserialize, Debug, Default)]
 struct ConfigFromFile {
     cargo_publish: Option<bool>,
     git_push: Option<bool>,
@@ -213,12 +212,8 @@ impl ConfigFromFile {
 
     fn load_from_file(path: &Path) -> RrResult<ConfigFromFile> {
         map_file(path, |contents| {
-            let mut parser = toml::Parser::new(&contents);
-            let value = parser.parse()
-                .ok_or(format!("Couldn't parse toml file '{}': {:?}", path.display(), parser.errors))?;
-
-            let mut decoder = toml::Decoder::new(toml::Value::Table(value));
-            Ok(ConfigFromFile::decode(&mut decoder)?)
+            let config = toml::from_str(&contents)?;
+            Ok(config)
         })
     }
 
