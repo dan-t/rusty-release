@@ -1,3 +1,8 @@
+0.5.0
+-----
+* Port code from 'rustc-serialize' to 'serde'
+* Upgrade toml dependency
+
 0.4.0
 -----
 * Change the default tag template from "<PROJ_NAME>-<NEW_VERSION>" to the more commonly used one "v<NEW_VERSION>"
