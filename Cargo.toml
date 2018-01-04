@@ -8,7 +8,7 @@ repository = "https://github.com/dan-t/rusty-release"
 readme = "README.md"
 
 [dependencies]
-clap = "~2.2.6"
+clap = "2.29.0"
 term = "0.4.6"
 tempfile = "2.2.0"
 toml = "~0.4.5"
