@@ -1,3 +1,7 @@
+0.6.0
+-----
+* Upgrading dependencies
+
 0.5.0
 -----
 * Port code from 'rustc-serialize' to 'serde'
