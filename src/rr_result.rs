@@ -2,7 +2,6 @@ use std::io;
 use std::convert::From;
 use std::fmt::{self, Display, Formatter};
 use semver::SemVerError;
-use clap;
 use term;
 use toml;
 
@@ -13,18 +12,13 @@ pub type RrResult<T> = Result<T, RrError>;
 #[derive(Clone, Debug)]
 pub enum RrError {
     /// generic error message
-    Message(String),
-
-    /// not a real error but clap - the command argument handler -
-    /// displays some info like '--help' or '--version'
-    ClapDisplaysInfo(String)
+    Message(String)
 }
 
 impl Display for RrError {
     fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
         match *self {
-            RrError::Message(ref msg)          => writeln!(f, "{}", msg),
-            RrError::ClapDisplaysInfo(ref msg) => writeln!(f, "{}", msg)
+            RrError::Message(ref msg) => writeln!(f, "{}", msg),
         }
     }
 }
@@ -52,17 +46,6 @@ impl From<term::Error> for RrError {
 impl From<toml::de::Error> for RrError {
     fn from(err: toml::de::Error) -> RrError {
         RrError::Message(err.to_string())
-    }
-}
-
-impl From<clap::Error> for RrError {
-    fn from(err: clap::Error) -> RrError {
-        let msg = err.to_string();
-        match err.kind {
-            clap::ErrorKind::HelpDisplayed | clap::ErrorKind::VersionDisplayed
-                => RrError::ClapDisplaysInfo(msg),
-            _   => RrError::Message(msg)
-        }
     }
 }
 

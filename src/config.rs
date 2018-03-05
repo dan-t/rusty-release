@@ -62,7 +62,7 @@ impl Config {
                 .takes_value(true))
            .arg_from_usage("-n --no-cargo-publish 'Do not publish to crates.io'")
            .arg_from_usage("-N --no-git-push 'Do not push to remote git repository'")
-           .get_matches_safe()?;
+           .get_matches();
 
        let start_dir = matches.value_of("start-dir")
            .map(PathBuf::from)

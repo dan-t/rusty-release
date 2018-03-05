@@ -14,7 +14,7 @@ use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use semver::Version;
-use rr_result::{RrResult, RrError};
+use rr_result::RrResult;
 use config::Config;
 use cargo_proj::CargoProj;
 use utils::{check_output, modify_file};
@@ -30,21 +30,10 @@ mod cargo;
 mod utils;
 
 fn main() {
-    let mut exit_code = 0;
     execute().unwrap_or_else(|err| {
-        match err {
-            RrError::Message(_) => {
-                stderrln!("{}", err);
-                exit_code = 1;
-            }
-
-            RrError::ClapDisplaysInfo(_) => {
-                exit_code = 2;
-            }
-        }
+        stderrln!("{}", err);
+        std::process::exit(1);
     });
-
-    std::process::exit(exit_code);
 }
 
 fn execute() -> RrResult<()> {
