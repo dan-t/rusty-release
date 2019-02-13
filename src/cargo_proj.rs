@@ -70,8 +70,8 @@ impl CargoProj {
     pub fn write_version(&mut self, version: &Version) -> RrResult<()> {
         if *version != self.version {
             modify_file(&self.cargo_toml, |contents| {
-                contents.replace(&format!("version = \"{}\"", self.version),
-                                 &format!("version = \"{}\"", version))
+                contents.replacen(&format!("version = \"{}\"", self.version),
+                                  &format!("version = \"{}\"", version), 1)
             })?;
 
             self.version = version.clone();
