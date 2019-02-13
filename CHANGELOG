@@ -1,3 +1,7 @@
+0.7.0
+-----
+* Fix update of version in 'Cargo.toml', might also have updated versions of dependencies
+
 0.6.1
 -----
 * Fix output of '--help'
