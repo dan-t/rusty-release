@@ -9,6 +9,7 @@ extern crate toml;
 extern crate semver;
 extern crate term;
 extern crate tempfile;
+extern crate dirs;
 
 use std::io::Write;
 use std::path::Path;

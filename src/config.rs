@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use clap::{App, Arg};
 use toml;
+use dirs;
 use rr_result::RrResult;
 use version_kind::VersionKind;
 use utils::map_file;
@@ -201,7 +202,7 @@ impl ConfigFromFile {
     }
 
     fn load_from_home_dir() -> RrResult<Option<ConfigFromFile>> {
-        if let Some(path) = env::home_dir().map(|d| d.join(config_file_name())) {
+        if let Some(path) = dirs::home_dir().map(|d| d.join(config_file_name())) {
             if path.is_file() {
                 return Ok(Some(ConfigFromFile::load_from_file(&path)?));
             }
