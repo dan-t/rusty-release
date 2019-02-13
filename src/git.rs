@@ -1,6 +1,6 @@
 use std::io::Write;
 use std::process::Command;
-use tempfile::{NamedTempFile, NamedTempFileOptions};
+use tempfile::{NamedTempFile, Builder};
 use rr_result::RrResult;
 use utils::check_output;
 
@@ -84,9 +84,9 @@ pub fn log_file(from: &str, to: Option<&str>) -> RrResult<NamedTempFile> {
         from.to_owned()
     };
 
-    let mut log_file = NamedTempFileOptions::new()
+    let mut log_file = Builder::new()
         .prefix(&prefix)
-        .create()?;
+        .tempfile()?;
 
     log_file.write_all(output.as_bytes())?;
     Ok(log_file)
